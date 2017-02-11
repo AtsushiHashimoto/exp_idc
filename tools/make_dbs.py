@@ -30,7 +30,7 @@ def make_test_db(src_dir,dist_dir):
         np.savetxt("%s/y_%03d.dat"%(dist_dir,i),y,fmt="%d",delimiter=',')
 
 def make_face_db(src_dir,dist_dir,n_clusters):
-    files = sorted(glob2.glob("%s/num%s/test*")%(src_dir,n_clusters))
+    files = sorted(glob2.glob("%s/num%s/test*"%(src_dir,n_clusters)))
     for i,file in enumerate(files):
         X = np.loadtxt(file,delimiter=',')
         np.savetxt("%s/X_%03d.csv"%(dist_dir,i),X,fmt="%.18e",delimiter=',')
@@ -41,7 +41,7 @@ def main(args,logger):
     if args.type=='test':
         make_test_db(src_dir,dist_dir)
     elif args.type=='face_feature':
-        make_face_db(src_dir,dist_dir)
+        make_face_db(src_dir,dist_dir,args.n_clusters)
     elif args.type=='preid':
         pass
     else:
@@ -82,13 +82,13 @@ parser.add_argument('dist_dir', \
 
 parser.add_argument('-n','--n_clusters', \
         action='store', \
-        nargs=?, \
+        nargs='?', \
         const=None, \
         default=None, \
         type=str, \
         choices=None, \
         help='Number of clusters',
-        metavar=None))
+        metavar=None)
 
 
 if __name__ == '__main__':

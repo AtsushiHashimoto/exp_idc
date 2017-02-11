@@ -4,8 +4,9 @@ cd $(dirname ${BASH_SOURCE[0]})/../
 
 source scripts/routines.sh
 
-target_datasets=(test face)
+#target_datasets=(test face)
 #target_datasets=face preid
+target_datasets=face_feature 
 # dimension reduction
 for exp in ${target_datasets}; do
   for alg in pca nmf; do
