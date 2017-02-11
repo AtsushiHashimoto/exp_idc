@@ -10,8 +10,9 @@ RESULTS_DIR=${EXP_DIR}/results
 #TRIALS=`seq -f "%03g" 0 99`
 TRIALS=`seq -f "%03g" 0 0`
 
-
+OVERWRITE=0
 QSUB=1
+
 QSUB_DIR=${EXP_DIR}/qsub
 QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
 UserGroup=gr20111
@@ -22,18 +23,25 @@ EXE=echo
 
 exec_command(){
   comm=$1
+
+  # if len(args)>1 and File.exists($2) and OVERWRITE==0
+  if [ $# -gt 1 -a ${OVERWRITE} -eq 0 ]; then
+    if [ -e $2 ]; then
+      # skip execution
+      return
+    fi
+  fi
   if [ ${QSUB} -eq 0 ]; then
     ${EXE} "${comm}"
     return
   fi
-
-  if [ $# -gt 1 ]; then
-    option=$2
+  if [ $# -gt 2 ]; then
+    option=$3
   else
     option="p=1:t=1:c=1:m=256M"
   fi
-  if [ $# -gt 2 ]; then
-    hours=$3
+  if [ $# -gt 3 ]; then
+    hours=$4
   else
     hours=00:30
   fi
@@ -109,7 +117,7 @@ do_clustering(){
   for trial in ${TRIALS}; do
     local src_file=$(get_affinity_matrix ${exp} ${trial} ${subpath})
     local dist_file=$(get_clustering_result ${exp} ${trial} ${subpath})
-    ${EXE} "python tools/do_clustering.py ${src_file} ${options} > ${dist_file}"
+    exec_command "python tools/do_clustering.py ${src_file} ${options} > ${dist_file}" ${dist_file}
   done
 
 }
@@ -130,7 +138,7 @@ make_affinity_matrix(){
   for trial in ${TRIALS}; do
     local src_file=$(get_data ${exp} ${trial} ${subpath})
     local dist_file=$(get_affinity_matrix ${exp} ${trial} ${subpath})
-    ${EXE} "python tools/make_affinity_matrix.py ${src_file} ${metric} ${options} > ${dist_file}"
+    exec_command "python tools/make_affinity_matrix.py ${src_file} ${metric} ${options} > ${dist_file}" ${dist_file}
   done
 }
 
@@ -147,7 +155,7 @@ reduce_dimension(){
     local dist_file=$(get_data ${exp} ${trial} ${alg}/${dim})
     #128MB for 128dim x 1000samples
     #${EXE} "python tools/reduce_dimension.py ${dim} ${src_file} ${dist_file} --algorithm ${alg}"
-    exec_command "python tools/reduce_dimension.py ${dim} ${src_file} ${dist_file} --algorithm ${alg}"
+    exec_command "python tools/reduce_dimension.py ${dim} ${src_file} ${dist_file} --algorithm ${alg}" ${dist_file}
   done
 }
 
@@ -163,6 +171,6 @@ sparse_encode(){
     local src_file=$(get_original_data ${exp} ${trial})
     local dist_file=$(get_data ${exp} ${trial} sparse_encode/${alpha})
     #196MB for 128dim x 1000samples
-    exec_command "python tools/sparse_encoding.py ${alpha} ${src_file} ${dist_file}"
+    exec_command "python tools/sparse_encoding.py ${alpha} ${src_file} ${dist_file}" ${dist_file}
   done
 }
