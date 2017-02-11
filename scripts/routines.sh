@@ -3,6 +3,7 @@
 
 ORIG_DATA_DIR=external
 EXP_DIR=exp
+TEMP_DIR=${EXP_DIR}/temp
 DATA_DIR=${EXP_DIR}/datasets
 AMAT_DIR=${EXP_DIR}/affinity_matrices
 RESULTS_DIR=${EXP_DIR}/results
@@ -39,7 +40,8 @@ exec_command(){
   #echo "/usr/bin/ls -lha > test.log" > temp|qsub -ug gr20111 -q gr20100b -W 12:00 -A p=1:t=1:c=1:m=1M temp
   temp_id=$(date +"%s");
   temp_sh=qsub_${temp_id}.sh
-  comm_="echo \"${comm}\" > ${temp_sh} | qsub -ug ${UserGroup} -q ${Queue} -W ${hours} -A ${option} ${temp_sh}"
+  work_dir=$(pwd)/$(dirname ${BASH_SOURCE[0]})/../
+  comm_="echo \"source ~/.bash_profile;cd ${work_dir};${comm}\" > ${temp_sh} | qsub -ug ${UserGroup} -q ${Queue} -W ${hours} -A ${option} ${temp_sh}"
   ${EXE} ${comm_}
 }
 
