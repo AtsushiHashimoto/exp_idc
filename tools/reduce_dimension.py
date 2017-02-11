@@ -15,7 +15,7 @@ import logging
 def main(args,logger):
     if args.algorithm == "pca":
         model = PCA(args.dimensions)
-    elif algs.algorithm == "nmf":
+    elif args.algorithm == "nmf":
         model = NMF(args.dimensions,max_iter=args.max_iter)
     else:
         logger.warn("Unknown algorithm '%s'"%args.algorithm)

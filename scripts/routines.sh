@@ -7,7 +7,7 @@ TEMP_DIR=${EXP_DIR}/temp
 DATA_DIR=${EXP_DIR}/datasets
 AMAT_DIR=${EXP_DIR}/affinity_matrices
 RESULTS_DIR=${EXP_DIR}/results
-#TRIALS=`seq -w 0 99`
+#TRIALS=`seq -f "%03g" 0 99`
 TRIALS=`seq -f "%03g" 0 0`
 
 
@@ -23,7 +23,7 @@ EXE=echo
 exec_command(){
   comm=$1
   if [ ${QSUB} -eq 0 ]; then
-    ${EXE} ${comm}
+    ${EXE} "${comm}"
     return
   fi
 
@@ -38,11 +38,11 @@ exec_command(){
     hours=00:30
   fi
   #echo "/usr/bin/ls -lha > test.log" > temp|qsub -ug gr20111 -q gr20100b -W 12:00 -A p=1:t=1:c=1:m=1M temp
-  temp_id=$(date +"%s");
-  temp_sh=qsub_${temp_id}.sh
+  temp_id=$(date +"%s.%N");
+  temp_sh=${TEMP_DIR}/qsub_${temp_id}.sh
   work_dir=$(pwd)/$(dirname ${BASH_SOURCE[0]})/../
   comm_="echo \"source ~/.bash_profile;cd ${work_dir};${comm}\" > ${temp_sh} | qsub -ug ${UserGroup} -q ${Queue} -W ${hours} -A ${option} ${temp_sh}"
-  ${EXE} ${comm_}
+  ${EXE} "${comm_}"
 }
 
 

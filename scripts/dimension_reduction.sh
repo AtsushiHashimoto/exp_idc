@@ -6,10 +6,11 @@ source scripts/routines.sh
 
 #target_datasets=(test face)
 #target_datasets=face preid
-target_datasets=face_feature 
+target_datasets=`seq -f "face_feature_%02g" 5 15` 
 # dimension reduction
 for exp in ${target_datasets}; do
-  for alg in pca nmf; do
+  #for alg in pca nmf; do
+  for alg in pca; do
     for dim in 32 64 128; do
       reduce_dimension ${exp} ${alg} ${dim}
     done
