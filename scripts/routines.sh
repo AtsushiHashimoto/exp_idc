@@ -7,13 +7,13 @@ TEMP_DIR=${EXP_DIR}/temp
 DATA_DIR=${EXP_DIR}/datasets
 MAT_DIR=${EXP_DIR}/matrices
 RESULTS_DIR=${EXP_DIR}/results
-TRIALS=`seq -f "%03g" 0 99`
+#TRIALS=`seq -f "%03g" 0 99`
 #TRIALS=`seq -f "%03g" 0 0`
 
 OVERWRITE=0
-QSUB=0
-EXE=sh\ -c
-#EXE=echo
+QSUB=1
+#EXE=sh\ -c
+EXE=echo
 
 QSUB_DIR=${EXP_DIR}/qsub
 QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
