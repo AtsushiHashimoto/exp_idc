@@ -113,6 +113,16 @@ do_clustering(){
   exec_command "python tools/do_clustering.py ${src_dir} ${dist_dir} ${options}" "${count_command}"
 }
 
+cross_validation(){
+  local dataset=$1
+  local algorithm=$2
+  local src_subpath=$3
+  local src_dir=$(get_matrix_dir ${exp} ${src_subpath})
+  local dist_dir=${src_dir}
+  local count_command="python tools/cross_validation.py ${src_dir} ${dist_dir} --count_targets"
+  exec_command "python tools/cross_validation.py ${src_dir} ${dist_dir} --algorithm ${algorithm}" "${count_command}"
+}
+
 make_matrix(){
   local type=$1
   local exp=$2
