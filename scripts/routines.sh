@@ -11,7 +11,7 @@ TRIALS=`seq -f "%03g" 0 99`
 #TRIALS=`seq -f "%03g" 0 0`
 
 OVERWRITE=0
-QSUB=1
+QSUB=0
 
 QSUB_DIR=${EXP_DIR}/qsub
 QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
@@ -26,7 +26,8 @@ exec_command(){
 
   # if len(args)>1 and File.exists($2) and OVERWRITE==0
   if [ $# -gt 1 -a ${OVERWRITE} -eq 0 ]; then
-    if [ -e $2 ]; then
+    local tar_num=$($2)
+    if [[ ${tar_num} -eq 0 ]]; then
       # skip execution
       return
     fi
@@ -43,7 +44,7 @@ exec_command(){
   if [ $# -gt 3 ]; then
     hours=$4
   else
-    hours=00:30
+    hours=18:00
   fi
   #echo "/usr/bin/ls -lha > test.log" > temp|qsub -ug gr20111 -q gr20100b -W 12:00 -A p=1:t=1:c=1:m=1M temp
   temp_id=$(date +"%s.%N");
@@ -53,8 +54,36 @@ exec_command(){
   ${EXE} "${comm_}"
 }
 
+get_data_dir(){
+  local exp=$1
+  if [ $# -eq 2 ]; then
+    local subpath=$2/
+  else
+    local subpath=
+  fi
+  local dir=${DATA_DIR}/${exp}/${subpath}
+  echo ${dir}
+}
+get_original_data_dir(){
+  echo $(get_data_dir $1 raw)
+}
+get_affinity_matrix_dir(){
+  local exp=$1
+  if [ $# -eq 2 ]; then
+    local subpath=$2/
+  else
+    local subpath=
+  fi
+  local dir=${AMAT_DIR}/${exp}/${subpath}.csv
+  echo ${dir}
+}
+get_clustering_result_dir(){
+  local exp=$1
+  local dir=${RESULTS_DIR}/${exp}/
+  echo ${dir}
+}
 
-get_data(){
+get_result_dir(){
   local exp=$1
   local trial=$2
   if [ $# -eq 3 ]; then
@@ -62,43 +91,8 @@ get_data(){
   else
     local subpath=
   fi
-  local file=${DATA_DIR}/${exp}/${subpath}X_${trial}.csv
-  echo ${file}
-}
-get_original_data(){
-  echo $(get_data $1 $2 raw)
-}
-
-
-get_affinity_matrix(){
-  local exp=$1
-  local trial=$2
-  if [ $# -eq 3 ]; then
-    local subpath=$3/
-  else
-    local subpath=
-  fi
-  local file = ${AMAT_DIR}/${exp}/${subpath}affinity_matrix-${trial}.csv
-  echo ${file}
-}
-
-get_clustering_result(){
-  local exp=$1
-  local trial=$2
-  local file = ${RESULTS_DIR}/${exp}/${trial}.csv
-  echo ${file}
-}
-
-get_label(){
-  local exp=$1
-  local trial=$2
-  if [ $# -eq 3 ]; then
-    local subpath=$3/
-  else
-    local subpath=
-  fi
-  local file = ${RESULTS_DIR}/${exp}/${subpath}summery.csv
-  echo ${file}
+  local dir=${RESULTS_DIR}/${exp}/${subpath}
+  echo ${dir}
 }
 
 do_clustering(){
@@ -111,15 +105,11 @@ do_clustering(){
     local options=
   fi
 
-  temp=$(get_clustering_result ${exp} 00 ${subpath})
-  mkdir -p `dirname ${temp}`
-
-  for trial in ${TRIALS}; do
-    local src_file=$(get_affinity_matrix ${exp} ${trial} ${subpath})
-    local dist_file=$(get_clustering_result ${exp} ${trial} ${subpath})
-    exec_command "python tools/do_clustering.py ${src_file} ${options} > ${dist_file}" ${dist_file}
-  done
-
+  local dist_dir=$(get_clustering_result_dir ${exp} ${subpath})
+  mkdir -p ${dist_dir}
+  local src_dir=$(get_affinity_matrix_dir ${exp} ${subpath})
+  local count_command="python tools/do_clustering.py ${src_dir} ${dist_dir} --count_targets}"
+  exec_command "python tools/do_clustering.py ${src_dir} ${dist_dir} ${options}" ${count_command}
 }
 
 make_affinity_matrix(){
@@ -132,14 +122,11 @@ make_affinity_matrix(){
     local options=
   fi
 
-  temp=$(get_affinity_matrix ${exp} 0 ${subpath})
-  mkdir -p `dirname ${temp}`
-
-  for trial in ${TRIALS}; do
-    local src_file=$(get_data ${exp} ${trial} ${subpath})
-    local dist_file=$(get_affinity_matrix ${exp} ${trial} ${subpath})
-    exec_command "python tools/make_affinity_matrix.py ${src_file} ${metric} ${options} > ${dist_file}" ${dist_file}
-  done
+  local dist_dir=$(get_affinity_matrix_dir ${exp} ${subpath})
+  mkdir -p ${dist_dir}
+  local src_dir=$(get_data_dir ${exp} ${subpath})
+  local count_command="python tools/make_affinity_matrix.py ${src_dir} ${dist_dir} --count_targets}"
+  exec_command "python tools/make_affinity_matrix.py ${metric} ${src_dir} ${dist_dir} ${options}" ${count_command}
 }
 
 reduce_dimension(){
@@ -147,30 +134,22 @@ reduce_dimension(){
   local alg=$2
   local dim=$3
 
-  temp=$(get_data ${exp} 0 ${alg}/${dim})
-  mkdir -p `dirname ${temp}`
+  local dist_dir=$(get_data_dir ${exp} ${alg}/${dim})
+  mkdir -p ${dist_dir}
+  local src_dir=$(get_original_data_dir ${exp})
 
-  for trial in ${TRIALS}; do
-    local src_file=$(get_original_data ${exp} ${trial})
-    local dist_file=$(get_data ${exp} ${trial} ${alg}/${dim})
-    #128MB for 128dim x 1000samples
-    #${EXE} "python tools/reduce_dimension.py ${dim} ${src_file} ${dist_file} --algorithm ${alg}"
-    exec_command "python tools/reduce_dimension.py ${dim} ${src_file} ${dist_file} --algorithm ${alg}" ${dist_file}
-  done
+  local count_command="python tools/reduce_dimension.py ${dim} ${src_dir} ${dist_dir} --count_targets"
+  exec_command "python tools/reduce_dimension.py ${dim} ${src_dir} ${dist_dir} --algorithm ${alg}" "${count_command}"
 }
 
 sparse_encode(){
   local exp=$1
   local alpha=$2
-  local method=$3
 
-  temp=$(get_data ${exp} 0 sparse_encode/${alpha})
-  mkdir -p `dirname ${temp}`
-
-  for trial in ${TRIALS}; do
-    local src_file=$(get_original_data ${exp} ${trial})
-    local dist_file=$(get_data ${exp} ${trial} sparse_encode/${alpha})
-    #196MB for 128dim x 1000samples
-    exec_command "python tools/sparse_encoding.py ${alpha} ${src_file} ${dist_file}" ${dist_file} 
-  done
+  local dist_dir=$(get_data_dir ${exp} sparse_encode/${alpha})
+  mkdir -p ${dist_dir}
+  local src_dir=$(get_original_data_dir ${exp})
+  #196MB for 128dim x 1000samples
+  local count_command="python tools/sparse_encoding.py ${alpha} ${src_dir} ${dist_dir} --count_targets"
+  exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dist_dir}" "${count_command}"
 }

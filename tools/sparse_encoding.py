@@ -3,7 +3,6 @@
 
 DESCRIPTION="This script do sparse encoding."
 #from memory_profiler import profile
-import sys
 
 import numpy as np
 import argparse
@@ -11,7 +10,13 @@ import logging
 import random
 from sklearn.decomposition import sparse_encode
 
-#@profile
+import sys
+from os.path import dirname
+sys.path.append(dirname(__file__))
+from my_target_counter import TargetCounter
+
+logger = logging.getLogger(__file__)
+
 def my_sparse_encode(X,alpha,method,n_references):
   refs = list(range(X.shape[0]))
   random.shuffle(refs)
@@ -36,10 +41,27 @@ def my_sparse_encode(X,alpha,method,n_references):
   return X_sparse
 
 
-def main(args,logger):
-    X=np.loadtxt(args.src_file,delimiter=",")
-    X_ = my_sparse_encode(X,args.alpha,args.method,args.num_references)
-    np.savetxt(args.dist_file,X_,delimiter=",")
+#@profile
+def main(args):
+    src_dir = args.src_dir
+    dist_dir = args.dist_dir
+    src_pat = "X_(\d{3}).csv$"
+    tar_template = "X_%s.csv"
+    tc=TargetCounter(src_pat,tar_template,src_dir,dist_dir)
+    target_ids,src_files = tc.listup_targets()
+    n_targets = len(target_ids)
+    if args.count_targets:
+        print(len(target_ids))
+        sys.exit()
+    if n_targets==0:
+        logger.warn("There are no before-process src files in '%s'"%src_dir)
+        sys.exit()
+
+    for id,src_file in zip(target_ids,src_files):
+        dist_file = "%s/%s"%(args.dist_dir,tc.id2distfile(id))
+        X=np.loadtxt(src_file,delimiter=",")
+        X_ = my_sparse_encode(X,args.alpha,args.method,args.num_references)
+        np.savetxt(dist_file,X_,delimiter=",")
 
 
 
@@ -55,24 +77,24 @@ parser.add_argument('alpha', \
         help='Dimensionality of target projection subspace', \
         metavar=None)
 
-parser.add_argument('src_file', \
+parser.add_argument('src_dir', \
         action='store', \
         nargs=None, \
         const=None, \
         default=None, \
         type=str, \
         choices=None, \
-        help='File path where the source data are located.', \
+        help='Directory path where the source data are located.', \
         metavar=None)
 
-parser.add_argument('dist_file', \
+parser.add_argument('dist_dir', \
         action='store', \
         nargs=None, \
         const=None, \
         default=None, \
         type=str, \
         choices=None, \
-        help='File path where the dimension-reduced data will be located.', \
+        help='Directory path where the dimension-reduced data will be located.', \
         metavar=None)
 
 parser.add_argument('-m', '--method', \
@@ -95,12 +117,13 @@ parser.add_argument('-r','--num_references', \
         help='Number of reference in the sample used as dictionary for sparse coding. set <0 to use all data as dictionary.(default: -1)', \
         metavar=None)
 
+parser.add_argument('--count_targets',\
+        action="store_true", default=False, help='count processing targets, and exit.')
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    logger = logging.getLogger(__file__)
     logger.setLevel(logging.DEBUG)
     sh = logging.StreamHandler()
     logger.addHandler(sh)
 
-    main(args,logger)
+    main(args)
