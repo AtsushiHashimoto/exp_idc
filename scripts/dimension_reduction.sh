@@ -11,12 +11,12 @@ target_datasets=`seq -f "face_feature_%02g" 5 15`
 for exp in ${target_datasets}; do
   #for alg in pca nmf; do
   for alg in pca; do
+    #for dim in 32 64 128; do
     for dim in 64; do
       reduce_dimension ${exp} ${alg} ${dim}
     done
   done
 done
-
 # sparse encoding
 method=lasso_lars
 

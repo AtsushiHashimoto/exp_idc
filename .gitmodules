@@ -1,0 +1,3 @@
+[submodule "external/submodules/self_tuning_sc"]
+	path = external/submodules/self_tuning_sc
+	url = https://github.com/pthimon/clustering.git

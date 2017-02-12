@@ -7,8 +7,8 @@ TEMP_DIR=${EXP_DIR}/temp
 DATA_DIR=${EXP_DIR}/datasets
 MAT_DIR=${EXP_DIR}/matrices
 RESULTS_DIR=${EXP_DIR}/results
-#TRIALS=`seq -f "%03g" 0 99`
-TRIALS=`seq -f "%03g" 0 0`
+TRIALS=`seq -f "%03g" 0 99`
+#TRIALS=`seq -f "%03g" 0 0`
 
 OVERWRITE=0
 QSUB=0
@@ -165,7 +165,6 @@ reduce_dimension(){
 sparse_encode(){
   local exp=$1
   local alpha=$2
-  local method=$3
 
   local dist_dir=$(get_data_dir ${exp} sparse_encode/${alpha})
   mkdir -p ${dist_dir}

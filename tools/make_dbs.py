@@ -2,14 +2,13 @@
 # coding: utf-8
 
 DESCRIPTION="This script unifies the data format from different datasets."
-from memory_profiler import profile
 
 import numpy as np
 import argparse
 import glob2
 import gzip
 import logging
-
+import os.path
 
 try:
    import cPickle as pickle
@@ -18,22 +17,29 @@ except:
 PROTOCOL = pickle.HIGHEST_PROTOCOL
 
 
-@profile
 def make_test_db(src_dir,dist_dir):
     files = glob2.glob("%s/*pickle.gz"%src_dir)
     for i,file in enumerate(files):
+        dist_file = "%s/X_%03d.csv"%(dist_dir,i)
+        if os.path.exists(dist_file):
+            continue
         with open(file,"rb") as fin:
             data = pickle.loads(gzip.decompress(fin.read()))
         X = data['samples']
         np.savetxt("%s/X_%03d.csv"%(dist_dir,i),X,fmt="%.18e",delimiter=',')
         y = data['labels']
-        np.savetxt("%s/y_%03d.dat"%(dist_dir,i),y,fmt="%d",delimiter=',')
+        np.savetxt(dist_file,y,fmt="%d",delimiter=',')
 
 def make_face_db(src_dir,dist_dir,n_clusters):
     files = sorted(glob2.glob("%s/num%s/test*"%(src_dir,n_clusters)))
     for i,file in enumerate(files):
+        dist_file = "%s/X_%03d.csv"%(dist_dir,i)
+        if os.path.exists(dist_file):
+            continue
+        print("src_file: %s"%file)
+        print("dist_file: %s"%dist_file)
         X = np.loadtxt(file,delimiter=',')
-        np.savetxt("%s/X_%03d.csv"%(dist_dir,i),X,fmt="%.18e",delimiter=',')
+        np.savetxt(dist_file,X,fmt="%.18e",delimiter=',')
 
 def main(args,logger):
     src_dir=args.src_dir
