@@ -112,14 +112,11 @@ do_clustering(){
   fi
 
   temp=$(get_clustering_result ${exp} 00 ${subpath})
-  mkdir -p `dirname ${temp}`
-
-  for trial in ${TRIALS}; do
-    local src_file=$(get_affinity_matrix ${exp} ${trial} ${subpath})
-    local dist_file=$(get_clustering_result ${exp} ${trial} ${subpath})
-    exec_command "python tools/do_clustering.py ${src_file} ${options} > ${dist_file}" ${dist_file}
-  done
-
+  local dist_dir=$(dirname ${temp})
+  mkdir -p ${dist_dir}
+  temp=$(get_affinity_matrix ${exp} 00 ${subpath})
+  local src_dir=$(dirname ${temp})
+  exec_command "python tools/do_clustering.py ${src_dir} ${options} > ${dist_dir}"
 }
 
 make_affinity_matrix(){
@@ -132,14 +129,12 @@ make_affinity_matrix(){
     local options=
   fi
 
-  temp=$(get_affinity_matrix ${exp} 0 ${subpath})
-  mkdir -p `dirname ${temp}`
-
-  for trial in ${TRIALS}; do
-    local src_file=$(get_data ${exp} ${trial} ${subpath})
-    local dist_file=$(get_affinity_matrix ${exp} ${trial} ${subpath})
-    exec_command "python tools/make_affinity_matrix.py ${src_file} ${metric} ${options} > ${dist_file}" ${dist_file}
-  done
+  temp=$(get_affinity_matrix ${exp} 00 ${subpath})
+  local dist_dir=$(dirname ${temp})
+  mkdir -p ${dist_dir}
+  temp=$(get_data ${exp} 00 ${subpath})
+  local src_dir=$(dirname ${temp})
+  exec_command "python tools/make_affinity_matrix.py ${metric} ${src_dir} ${dist_dir} ${options}"
 }
 
 reduce_dimension(){
