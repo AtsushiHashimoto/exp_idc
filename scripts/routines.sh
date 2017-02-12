@@ -5,21 +5,21 @@ ORIG_DATA_DIR=external
 EXP_DIR=exp
 TEMP_DIR=${EXP_DIR}/temp
 DATA_DIR=${EXP_DIR}/datasets
-AMAT_DIR=${EXP_DIR}/affinity_matrices
+MAT_DIR=${EXP_DIR}/matrices
 RESULTS_DIR=${EXP_DIR}/results
 #TRIALS=`seq -f "%03g" 0 99`
 TRIALS=`seq -f "%03g" 0 0`
 
 OVERWRITE=0
 QSUB=0
+EXE=sh\ -c
+#EXE=echo
 
 QSUB_DIR=${EXP_DIR}/qsub
 QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
 UserGroup=gr20111
 Queue=gr20100b
 
-#EXE=sh\ -c
-EXE=echo
 
 exec_command(){
   comm=$1
@@ -67,14 +67,14 @@ get_data_dir(){
 get_original_data_dir(){
   echo $(get_data_dir $1 raw)
 }
-get_affinity_matrix_dir(){
+get_matrix_dir(){
   local exp=$1
   if [ $# -eq 2 ]; then
     local subpath=$2/
   else
     local subpath=
   fi
-  local dir=${AMAT_DIR}/${exp}/${subpath}.csv
+  local dir=${MAT_DIR}/${exp}/${subpath}
   echo ${dir}
 }
 get_clustering_result_dir(){
@@ -98,36 +98,56 @@ get_result_dir(){
 do_clustering(){
   local exp=$1
   local metric=$2
-  local subpath=$3
-  if [[ $# -eq 4 ]]; then
-    local options=$4
+  local src_subpath=$3
+  local dist_subpath=$4
+  if [[ $# -eq 5 ]]; then
+    local options=$5
   else
     local options=
   fi
 
-  local dist_dir=$(get_clustering_result_dir ${exp} ${subpath})
+  local dist_dir=$(get_clustering_result_dir ${exp} ${dist_subpath})
   mkdir -p ${dist_dir}
-  local src_dir=$(get_affinity_matrix_dir ${exp} ${subpath})
-  local count_command="python tools/do_clustering.py ${src_dir} ${dist_dir} --count_targets}"
-  exec_command "python tools/do_clustering.py ${src_dir} ${dist_dir} ${options}" ${count_command}
+  local src_dir=$(get_matrix_dir ${exp} ${src_subpath})
+  local count_command="python tools/do_clustering.py ${src_dir} ${dist_dir} --count_targets"
+  exec_command "python tools/do_clustering.py ${src_dir} ${dist_dir} ${options}" "${count_command}"
 }
 
+make_matrix(){
+  local type=$1
+  local exp=$2
+  local metric=$3
+  local src_subpath=$4
+  local dist_subpath=$5
+  if [[ $# -eq 6 ]]; then
+    local options=$6
+  else
+    local options=
+  fi
+
+  local dist_dir=$(get_matrix_dir ${exp} ${dist_subpath})
+  mkdir -p ${dist_dir}
+  local src_dir=$(get_data_dir ${exp} ${src_subpath})
+  local count_command="python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dist_dir} --count_targets"
+  exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dist_dir} ${options}" "${count_command}"
+}
 make_affinity_matrix(){
-  local exp=$1
-  local metric=$2
-  local subpath=$3
-  if [[ $# -eq 4 ]]; then
-    local options=$4
+  if [[ $# -eq 5 ]]; then
+    local options=$5
   else
     local options=
   fi
-
-  local dist_dir=$(get_affinity_matrix_dir ${exp} ${subpath})
-  mkdir -p ${dist_dir}
-  local src_dir=$(get_data_dir ${exp} ${subpath})
-  local count_command="python tools/make_affinity_matrix.py ${src_dir} ${dist_dir} --count_targets}"
-  exec_command "python tools/make_affinity_matrix.py ${metric} ${src_dir} ${dist_dir} ${options}" ${count_command}
+  make_matrix affinity $1 $2 $3 $4 ${options}
 }
+make_distance_matrix(){
+  if [[ $# -eq 5 ]]; then
+    local options=$5
+  else
+    local options=
+  fi
+  make_matrix distance $1 $2 $3 $4 ${options}
+}
+
 
 reduce_dimension(){
   local exp=$1
