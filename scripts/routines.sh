@@ -11,7 +11,7 @@ RESULTS_DIR=${EXP_DIR}/results
 TRIALS=`seq -f "%03g" 0 0`
 
 OVERWRITE=0
-QSUB=1
+QSUB=0
 
 QSUB_DIR=${EXP_DIR}/qsub
 QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
@@ -27,7 +27,7 @@ exec_command(){
   # if len(args)>1 and File.exists($2) and OVERWRITE==0
   if [ $# -gt 1 -a ${OVERWRITE} -eq 0 ]; then
     local tar_num=$($2)
-    if [ ${tar_num} -eq 0 ]; then
+    if [[ ${tar_num} -eq 0 ]]; then
       # skip execution
       return
     fi
@@ -44,7 +44,7 @@ exec_command(){
   if [ $# -gt 3 ]; then
     hours=$4
   else
-    hours=00:30
+    hours=18:00
   fi
   #echo "/usr/bin/ls -lha > test.log" > temp|qsub -ug gr20111 -q gr20100b -W 12:00 -A p=1:t=1:c=1:m=1M temp
   temp_id=$(date +"%s.%N");
@@ -66,6 +66,7 @@ get_data_dir(){
 }
 get_original_data_dir(){
   echo $(get_data_dir $1 raw)
+}
 get_affinity_matrix_dir(){
   local exp=$1
   if [ $# -eq 2 ]; then
@@ -75,7 +76,7 @@ get_affinity_matrix_dir(){
   fi
   local dir=${AMAT_DIR}/${exp}/${subpath}.csv
   echo ${dir}
-
+}
 get_clustering_result_dir(){
   local exp=$1
   local dir=${RESULTS_DIR}/${exp}/
@@ -134,11 +135,11 @@ reduce_dimension(){
   local dim=$3
 
   local dist_dir=$(get_data_dir ${exp} ${alg}/${dim})
-  mkdir -p `dirname ${temp}`
+  mkdir -p ${dist_dir}
   local src_dir=$(get_original_data_dir ${exp})
 
-  local count_command="python tools/reduce_dimension.py ${dim} ${src_dir} ${dist_dir} --count_targets}"
-  exec_command "python tools/reduce_dimension.py ${dim} ${src_dir} ${dist_dir} --algorithm ${alg}" ${count_command}
+  local count_command="python tools/reduce_dimension.py ${dim} ${src_dir} ${dist_dir} --count_targets"
+  exec_command "python tools/reduce_dimension.py ${dim} ${src_dir} ${dist_dir} --algorithm ${alg}" "${count_command}"
 }
 
 sparse_encode(){
@@ -147,9 +148,9 @@ sparse_encode(){
   local method=$3
 
   local dist_dir=$(get_data_dir ${exp} sparse_encode/${alpha})
-  mkdir -p `dirname ${temp}`
+  mkdir -p ${dist_dir}
   local src_dir=$(get_original_data_dir ${exp})
   #196MB for 128dim x 1000samples
-  local count_command="python tools/sparse_encoding.py ${alpha} ${src_file} ${dist_file} --count_targets"
-  exec_command "python tools/sparse_encoding.py ${alpha} ${src_file} ${dist_file}" ${count_command}
+  local count_command="python tools/sparse_encoding.py ${alpha} ${src_dir} ${dist_dir} --count_targets"
+  exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dist_dir}" "${count_command}"
 }

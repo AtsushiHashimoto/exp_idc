@@ -13,21 +13,28 @@ from os.path import dirname
 import sys
 
 sys.path.append(dirname(__file__))
+import my_target_counter
 import self_tuning_spectral_clustering
 
-global logger = logging.getLogger(__file__)
-global r = re.compile("^.*/X_(\d{3}).csv$")
 
 @profile
 def main(args):
     src_dir = args.src_dir
     dist_dir = args.dist_dir
-    targets = get_targets(src_dir,dist_dir)
-
-    if len(targets)==0:
-        return
+    src_pat = "X_(\d{3}).csv$"
+    tar_template = "y_%s.dat"
+    tc=TargetCounter(src_pat,tar_template,src_dir,dist_dir)
+    target_ids,src_files = tc.listup_targets()
+    n_targets = len(target_ids)
+    if args.count_targets:
+        print(len(target_ids))
+        sys.exit()
+    if n_targets==0:
+        logger.warn("There are no before-process src files in '%s'"%src_dir)
+        sys.exit()
 
     model = get_model(args)
+
     for t in targets:
         X=np.load("%s/X_%s.csv"%(src_dir,t))
         y=model.fit_predict(X)
@@ -44,21 +51,7 @@ def get_model(args):
     else:
         logger.warn("Unknown Algorithm '%s' is directed."%alg)
 
-def extract_trial_id(src_file):
-    m = r.search(src_file)
-    if m==None:
-        return None
-    return m.group(1)
-def id2distfile(id):
-    return "y_%s.dat"%id
 
-def get_targets(src_dir,dist_dir):
-    targets = map(extract_trial_id,glob2.glob("%s/*.csv"%src_dir))
-    targets = [t for t in targets if t!=None]
-    print("targets: ",targets)
-    completes = map(basename,glob2.glob("%s/*.dat"%dist_dir))
-    print("completes: ",completes)
-    return [t for t in targets if id2distfile(t) not in completes]
 
 
 parser = argparse.ArgumentParser(description=DESCRIPTION)
@@ -95,8 +88,10 @@ parser.add_argument('dist_dir', \
 
 
 
+
 if __name__ == '__main__':
     args = parser.parse_args()
+
     logger.setLevel(logging.DEBUG)
     sh = logging.StreamHandler()
     logger.addHandler(sh)
