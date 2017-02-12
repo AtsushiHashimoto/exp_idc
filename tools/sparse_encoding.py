@@ -11,7 +11,7 @@ import logging
 import random
 from sklearn.decomposition import sparse_encode
 
-
+#@profile
 def my_sparse_encode(X,alpha,method,n_references):
   refs = list(range(X.shape[0]))
   random.shuffle(refs)
@@ -36,7 +36,6 @@ def my_sparse_encode(X,alpha,method,n_references):
   return X_sparse
 
 
-#@profile
 def main(args,logger):
     X=np.loadtxt(args.src_file,delimiter=",")
     X_ = my_sparse_encode(X,args.alpha,args.method,args.num_references)

@@ -7,8 +7,8 @@ TEMP_DIR=${EXP_DIR}/temp
 DATA_DIR=${EXP_DIR}/datasets
 AMAT_DIR=${EXP_DIR}/affinity_matrices
 RESULTS_DIR=${EXP_DIR}/results
-#TRIALS=`seq -f "%03g" 0 99`
-TRIALS=`seq -f "%03g" 0 0`
+TRIALS=`seq -f "%03g" 0 99`
+#TRIALS=`seq -f "%03g" 0 0`
 
 OVERWRITE=0
 QSUB=1
@@ -171,6 +171,6 @@ sparse_encode(){
     local src_file=$(get_original_data ${exp} ${trial})
     local dist_file=$(get_data ${exp} ${trial} sparse_encode/${alpha})
     #196MB for 128dim x 1000samples
-    exec_command "python tools/sparse_encoding.py ${alpha} ${src_file} ${dist_file}" ${dist_file}
+    exec_command "python tools/sparse_encoding.py ${alpha} ${src_file} ${dist_file}" ${dist_file} 
   done
 }
