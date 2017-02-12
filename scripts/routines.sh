@@ -7,19 +7,19 @@ TEMP_DIR=${EXP_DIR}/temp
 DATA_DIR=${EXP_DIR}/datasets
 AMAT_DIR=${EXP_DIR}/affinity_matrices
 RESULTS_DIR=${EXP_DIR}/results
-TRIALS=`seq -f "%03g" 0 99`
+#TRIALS=`seq -f "%03g" 0 99`
 #TRIALS=`seq -f "%03g" 0 0`
 
 OVERWRITE=0
-QSUB=0
+QSUB=1
 
 QSUB_DIR=${EXP_DIR}/qsub
 QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
 UserGroup=gr20111
 Queue=gr20100b
 
-#EXE=sh\ -c
-EXE=echo
+EXE=sh\ -c
+#EXE=echo
 
 exec_command(){
   comm=$1
