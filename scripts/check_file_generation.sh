@@ -16,6 +16,19 @@ file_list_generate_command=$2
 # ex) file_list_generate_command=`seq -f ${file_template} 0 99`
 
 for dir in `find ${root_data_dir} -type d`; do
+
+  # check if the directory has only directories or not.
+  file_num=$(ls -1 ${dir} | wc -l)
+  dir_num=$(find ${dir} -maxdepth 0 -type d | wc -l)
+  #echo ${dir}
+  #echo file_num:${file_num}
+  #echo dir_num:${dir_num}
+  if [ ${file_num} -ne 0 -a ${file_num} -eq ${dir_num} ]; then
+    # skip node-directories.
+    continue
+  fi
+
+  # check if the directory has target files or not.
   is_any_file=0
   for file in `${file_list_generate_command}`; do
     if [ -e ${dir}/${file} ]; then
@@ -23,6 +36,7 @@ for dir in `find ${root_data_dir} -type d`; do
       break
     fi
   done
+
   if [ ${is_any_file} -eq 0 ]; then
     echo "### ${dir} contains no target files."
     continue
