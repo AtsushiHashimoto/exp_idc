@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Collection of routine functions
 
+
+source scripts/my_env.sh
+
 ORIG_DATA_DIR=external
 EXP_DIR=exp
 TEMP_DIR=${EXP_DIR}/temp
@@ -10,10 +13,6 @@ RESULTS_DIR=${EXP_DIR}/results
 #TRIALS=`seq -f "%03g" 0 99`
 #TRIALS=`seq -f "%03g" 0 0`
 
-OVERWRITE=0
-QSUB=1
-#EXE=sh\ -c
-EXE=echo
 
 QSUB_DIR=${EXP_DIR}/qsub
 QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
