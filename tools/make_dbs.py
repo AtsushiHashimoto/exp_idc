@@ -64,7 +64,7 @@ def make_preid_db(src_dir,dest_dir,n_clusters):
     ys = sorted(glob2.glob("%s/y_*.npy"%src_dir))
     Xys = [[np.load(X),np.load(y)] for X,y in zip(Xs,ys)]
     for t in range(0,100):
-        dest_X_file,dest_y_file = get_dest_files("%s/num%02d"%(dest_dir,n_clusters),t)
+        dest_X_file,dest_y_file = get_dest_files(dest_dir,t)
         random.shuffle(Xys)
         Xys_t = Xys[0:n_clusters]
         sample_num = int(np.random.normal(8,1))
