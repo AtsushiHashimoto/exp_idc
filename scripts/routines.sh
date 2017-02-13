@@ -12,8 +12,8 @@ RESULTS_DIR=${EXP_DIR}/results
 
 OVERWRITE=0
 QSUB=1
-#EXE=sh\ -c
-EXE=echo
+EXE=sh\ -c
+#EXE=echo
 
 QSUB_DIR=${EXP_DIR}/qsub
 QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
@@ -143,6 +143,7 @@ make_matrix(){
   mkdir -p ${dest_dir}
   local src_dir=$(get_data_dir ${exp} ${src_subpath})
   local count_command="python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} --count_targets"
+  #echo ${count_command}
   exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} ${options}" "${count_command}"
 }
 
