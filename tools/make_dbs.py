@@ -9,6 +9,7 @@ import glob2
 import gzip
 import logging
 import os.path
+import csv
 
 try:
    import cPickle as pickle
@@ -18,7 +19,7 @@ PROTOCOL = pickle.HIGHEST_PROTOCOL
 
 
 def check_dest_files(dest_dir,i):
-    dest_X_file = "%s/X_%03d.csv"%(_dir,i)
+    dest_X_file = "%s/X_%03d.csv"%(dest_dir,i)
     dest_y_file = "%s/y_%03d.dat"%(dest_dir,i)
     if os.path.exists(dest_X_file) and os.path.exists(dest_y_file):
         return None,None
@@ -40,15 +41,15 @@ def make_test_db(src_dir,dest_dir):
         save_data(X,y,dest_X_file,dest_y_file)
 
 def make_face_db(src_dir,dest_dir,n_clusters):
-    files = sorted(glob2.glob("%s/num%s/test*"%(src_dir,n_clusters)))
+    files = sorted(glob2.glob("%s/num%s/test*_sample_feature.csv"%(src_dir,n_clusters)))
     for i,file in enumerate(files):
         dest_X_file,dest_y_file = check_dest_files(dest_dir,i)
         if None == dest_X_file:
             continue
         X = np.loadtxt(file,delimiter=',')
         src_y_file = "%s/num%s/test%02d_groundtruth.txt"%(src_dir,n_clusters,i)
-        data = np.loadtxt(src_y_file,delimiter=',')
-        y = [r[2] for r in data]
+        data = csv.reader(open(src_y_file,'r'))
+        y = [int(r[2]) for r in data]
         save_data(X,y,dest_X_file,dest_y_file)
 
 def main(args,logger):
