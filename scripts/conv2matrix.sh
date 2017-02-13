@@ -10,8 +10,7 @@ se_paths=`seq -f "sparse_encode/%0.2f" 0.00 0.05 1.00`
 
 # affinity calculation
 for exp in ${target_datasets}; do
-  #for subpath in raw ${se_paths}; do
-  for subpath in ${se_paths}; do
+  for subpath in raw ${se_paths}; do
     echo $(get_matrix_dir ${exp} ${subpath})
     # cosine
     make_affinity_matrix ${exp} cosine ${subpath} affinity_cosine
