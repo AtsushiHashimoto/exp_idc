@@ -4,8 +4,8 @@ cd $(dirname ${BASH_SOURCE[0]})/../
 
 source scripts/routines.sh
 
-target_datasets=test
-#target_datasets=`seq -f "face_feature_%02g" 5 15`
+#target_datasets=test
+target_datasets=`seq -f "face_feature_%02g" 5 15`
 se_paths=`seq -f "sparse_encode/%g" 0.00 0.05 1.00`
 # affinity calculation
 for exp in ${target_datasets}; do
@@ -18,6 +18,7 @@ for exp in ${target_datasets}; do
     make_affinity_matrix ${exp} euclidean ${subpath} affinity_euclidean "--gamma=0.001"
   done
 done
+
 pca_paths=pca/64
 for exp in ${target_datasets}; do
   for subpath in raw ${pca_paths}; do
