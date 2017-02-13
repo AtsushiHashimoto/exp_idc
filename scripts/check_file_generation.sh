@@ -19,7 +19,8 @@ for dir in `find ${root_data_dir} -type d`; do
 
   # check if the directory has only directories or not.
   file_num=$(ls -1 ${dir} | wc -l)
-  dir_num=$(find ${dir} -maxdepth 0 -type d | wc -l)
+  dir_num=$(find ${dir} -maxdepth 1 -type d | wc -l)
+  dir_num=$(expr ${dir_num} - 1)
   #echo ${dir}
   #echo file_num:${file_num}
   #echo dir_num:${dir_num}
@@ -39,6 +40,7 @@ for dir in `find ${root_data_dir} -type d`; do
 
   if [ ${is_any_file} -eq 0 ]; then
     echo "### ${dir} contains no target files."
+    rmdir ${dir}
     continue
   fi
 

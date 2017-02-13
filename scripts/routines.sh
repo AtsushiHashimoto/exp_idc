@@ -142,6 +142,7 @@ make_matrix(){
   mkdir -p ${dest_dir}
   local src_dir=$(get_data_dir ${exp} ${src_subpath})
   local count_command="python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} --count_targets"
+  #echo ${count_command}
   exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} ${options}" "${count_command}"
 }
 
