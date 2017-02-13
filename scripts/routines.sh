@@ -99,18 +99,18 @@ do_clustering(){
   local exp=$1
   local metric=$2
   local src_subpath=$3
-  local dist_subpath=$4
+  local dest_subpath=$4
   if [[ $# -eq 5 ]]; then
     local options=$5
   else
     local options=
   fi
 
-  local dist_dir=$(get_clustering_result_dir ${exp} ${dist_subpath})
-  mkdir -p ${dist_dir}
+  local dest_dir=$(get_clustering_result_dir ${exp} ${dest_subpath})
+  mkdir -p ${dest_dir}
   local src_dir=$(get_matrix_dir ${exp} ${src_subpath})
-  local count_command="python tools/do_clustering.py ${src_dir} ${dist_dir} --count_targets"
-  exec_command "python tools/do_clustering.py ${src_dir} ${dist_dir} ${options}" "${count_command}"
+  local count_command="python tools/do_clustering.py ${src_dir} ${dest_dir} --count_targets"
+  exec_command "python tools/do_clustering.py ${src_dir} ${dest_dir} ${options}" "${count_command}"
 }
 
 cross_validation(){
@@ -118,9 +118,9 @@ cross_validation(){
   local algorithm=$2
   local src_subpath=$3
   local src_dir=$(get_matrix_dir ${exp} ${src_subpath})
-  local dist_dir=${src_dir}
-  local count_command="python tools/cross_validation.py ${src_dir} ${dist_dir} --count_targets"
-  exec_command "python tools/cross_validation.py ${src_dir} ${dist_dir} --algorithm ${algorithm}" "${count_command}"
+  local dest_dir=${src_dir}
+  local count_command="python tools/cross_validation.py ${src_dir} ${dest_dir} --count_targets"
+  exec_command "python tools/cross_validation.py ${src_dir} ${dest_dir} --algorithm ${algorithm}" "${count_command}"
 }
 
 make_matrix(){
@@ -128,18 +128,20 @@ make_matrix(){
   local exp=$2
   local metric=$3
   local src_subpath=$4
-  local dist_subpath=$5
+  local metric_name=$5
+  local dest_subpath=$4/${metric_name}
+
   if [[ $# -eq 6 ]]; then
     local options=$6
   else
     local options=
   fi
 
-  local dist_dir=$(get_matrix_dir ${exp} ${dist_subpath})
-  mkdir -p ${dist_dir}
+  local dest_dir=$(get_matrix_dir ${exp} ${dest_subpath})
+  mkdir -p ${dest_dir}
   local src_dir=$(get_data_dir ${exp} ${src_subpath})
-  local count_command="python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dist_dir} --count_targets"
-  exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dist_dir} ${options}" "${count_command}"
+  local count_command="python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} --count_targets"
+  exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} ${options}" "${count_command}"
 }
 make_affinity_matrix(){
   if [[ $# -eq 5 ]]; then
@@ -149,13 +151,13 @@ make_affinity_matrix(){
   fi
   make_matrix affinity $1 $2 $3 $4 ${options}
 }
-make_distance_matrix(){
+make_destance_matrix(){
   if [[ $# -eq 5 ]]; then
     local options=$5
   else
     local options=
   fi
-  make_matrix distance $1 $2 $3 $4 ${options}
+  make_matrix destance $1 $2 $3 $4 ${options}
 }
 
 
@@ -164,22 +166,22 @@ reduce_dimension(){
   local alg=$2
   local dim=$3
 
-  local dist_dir=$(get_data_dir ${exp} ${alg}/${dim})
-  mkdir -p ${dist_dir}
+  local dest_dir=$(get_data_dir ${exp} ${alg}/${dim})
+  mkdir -p ${dest_dir}
   local src_dir=$(get_original_data_dir ${exp})
 
-  local count_command="python tools/reduce_dimension.py ${dim} ${src_dir} ${dist_dir} --count_targets"
-  exec_command "python tools/reduce_dimension.py ${dim} ${src_dir} ${dist_dir} --algorithm ${alg}" "${count_command}"
+  local count_command="python tools/reduce_dimension.py ${dim} ${src_dir} ${dest_dir} --count_targets"
+  exec_command "python tools/reduce_dimension.py ${dim} ${src_dir} ${dest_dir} --algorithm ${alg}" "${count_command}"
 }
 
 sparse_encode(){
   local exp=$1
   local alpha=$2
 
-  local dist_dir=$(get_data_dir ${exp} sparse_encode/${alpha})
-  mkdir -p ${dist_dir}
+  local dest_dir=$(get_data_dir ${exp} sparse_encode/${alpha})
+  mkdir -p ${dest_dir}
   local src_dir=$(get_original_data_dir ${exp})
   #196MB for 128dim x 1000samples
-  local count_command="python tools/sparse_encoding.py ${alpha} ${src_dir} ${dist_dir} --count_targets"
-  exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dist_dir}" "${count_command}"
+  local count_command="python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --count_targets"
+  exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir}" "${count_command}"
 }

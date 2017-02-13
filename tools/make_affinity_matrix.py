@@ -27,10 +27,10 @@ def calc_stsc_metric(X):
 
 def main(args):
     src_dir = args.src_dir
-    dist_dir = args.dist_dir
+    dest_dir = args.dest_dir
     src_pat = "X_(\d{3}).csv$"
     tar_template = "W_%s.csv"
-    tc=TargetCounter(src_pat,tar_template,src_dir,dist_dir)
+    tc=TargetCounter(src_pat,tar_template,src_dir,dest_dir)
     target_ids,src_files = tc.listup_targets()
     n_targets = len(target_ids)
     if args.count_targets:
@@ -42,8 +42,8 @@ def main(args):
 
 
     for id,src_file in zip(target_ids,src_files):
-        dist_file = "%s/%s"%(args.dist_dir,tc.id2distfile(id))
-        #print(id,src_file,dist_file)
+        dest_file = "%s/%s"%(args.dest_dir,tc.id2destfile(id))
+        #print(id,src_file,dest_file)
         X=np.loadtxt(src_file,delimiter=",")
         if args.metric=='euclidean':
             if args.gamma==None:
@@ -55,7 +55,7 @@ def main(args):
         else:
             logger.warn("unknown metric '%s'."%args.metric)
         #W = sm.pairwise.pairwise_distances(X, Y=None, metric=args.metric)
-        np.savetxt(dist_file,W,delimiter=",")
+        np.savetxt(dest_file,W,delimiter=",")
 
 
 
@@ -81,7 +81,7 @@ parser.add_argument('src_dir', \
         help='Directory path where the source data are located.', \
         metavar=None)
 
-parser.add_argument('dist_dir', \
+parser.add_argument('dest_dir', \
         action='store', \
         nargs=None, \
         const=None, \
