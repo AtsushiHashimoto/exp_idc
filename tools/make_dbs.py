@@ -67,9 +67,9 @@ def make_preid_db(src_dir,dest_dir,n_clusters):
         dest_X_file,dest_y_file = get_dest_files(dest_dir,t)
         random.shuffle(Xys)
         Xys_t = Xys[0:n_clusters]
-        sample_num = int(np.random.normal(8,1))
-        X_ = np.r_[flatten([X[max(0,sample_num):min(sample_num,len(X))] for X,y in Xys_t])]
-        y_ = np.r_[flatten([y[max(0,sample_num):min(sample_num,len(y))] for X,y in Xys_t])]
+        sample_num = max(1,int(np.random.normal(8,1)))
+        X_ = np.r_[flatten([X[0:min(sample_num,len(X))] for X,y in Xys_t])]
+        y_ = np.r_[flatten([y[0:min(sample_num,len(y))] for X,y in Xys_t])]
         save_data(X_,y_,dest_X_file,dest_y_file)
 
 def main(args,logger):
