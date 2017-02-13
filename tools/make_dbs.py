@@ -10,6 +10,7 @@ import gzip
 import logging
 import os.path
 import csv
+import random
 
 try:
    import cPickle as pickle
@@ -17,13 +18,17 @@ except:
    import pickle
 PROTOCOL = pickle.HIGHEST_PROTOCOL
 
-
-def check_dest_files(dest_dir,i):
+def get_dest_files(dest_dir,i):
     dest_X_file = "%s/X_%03d.csv"%(dest_dir,i)
     dest_y_file = "%s/y_%03d.dat"%(dest_dir,i)
+    return dest_X_file,dest_y_file
+
+def check_dest_files(dest_dir,i):
+    dest_X_file,dest_y_file = get_dest_files(dest_dir,i)
     if os.path.exists(dest_X_file) and os.path.exists(dest_y_file):
         return None,None
     return dest_X_file,dest_y_file
+
 def save_data(X,y,dest_X_file,dest_y_file):
     np.savetxt(dest_X_file,X,fmt="%.18e",delimiter=',')
     np.savetxt(dest_y_file,y,fmt="%d",delimiter=',')
@@ -52,6 +57,21 @@ def make_face_db(src_dir,dest_dir,n_clusters):
         y = [int(r[2]) for r in data]
         save_data(X,y,dest_X_file,dest_y_file)
 
+def make_preid_db(src_dir,dest_dir,n_clusters):
+    flatten = lambda l: [item for sublist in l for item in sublist]
+
+    Xs = sorted(glob2.glob("%s/X_*.npy"%src_dir))
+    ys = sorted(glob2.glob("%s/y_*.npy"%src_dir))
+    Xys = [[np.load(X),np.load(y)] for X,y in zip(Xs,ys)]
+    for t in range(0,100):
+        dest_X_file,dest_y_file = get_dest_files("%s/num%02d"%(dest_dir,n_clusters),t)
+        random.shuffle(Xys)
+        Xys_t = Xys[0:n_clusters]
+        sample_num = int(np.random.normal(8,1))
+        X_ = np.r_[flatten([X[max(0,sample_num):min(sample_num,len(X))] for X,y in Xys_t])]
+        y_ = np.r_[flatten([y[max(0,sample_num):min(sample_num,len(y))] for X,y in Xys_t])]
+        save_data(X_,y_,dest_X_file,dest_y_file)
+
 def main(args,logger):
     src_dir=args.src_dir
     dest_dir=args.dest_dir
@@ -60,7 +80,7 @@ def main(args,logger):
     elif args.type=='face_feature':
         make_face_db(src_dir,dest_dir,args.n_clusters)
     elif args.type=='preid':
-        pass
+        make_preid_db(src_dir,dest_dir,args.n_clusters)
     else:
         logger.warn("Unknown dataset type: '%s'."%args.type)
 
@@ -102,7 +122,7 @@ parser.add_argument('-n','--n_clusters', \
         nargs='?', \
         const=None, \
         default=None, \
-        type=str, \
+        type=int, \
         choices=None, \
         help='Number of clusters',
         metavar=None)
