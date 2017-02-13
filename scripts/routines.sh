@@ -113,6 +113,7 @@ do_clustering(){
   exec_command "python tools/do_clustering.py ${src_dir} ${dest_dir} ${options}" "${count_command}"
 }
 
+
 cross_validation(){
   local dataset=$1
   local algorithm=$2
@@ -122,6 +123,7 @@ cross_validation(){
   local count_command="python tools/cross_validation.py ${src_dir} ${dest_dir} --count_targets"
   exec_command "python tools/cross_validation.py ${src_dir} ${dest_dir} --algorithm ${algorithm}" "${count_command}"
 }
+
 
 make_matrix(){
   local type=$1
@@ -143,6 +145,7 @@ make_matrix(){
   local count_command="python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} --count_targets"
   exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} ${options}" "${count_command}"
 }
+
 make_affinity_matrix(){
   if [[ $# -eq 5 ]]; then
     local options=$5
@@ -151,13 +154,13 @@ make_affinity_matrix(){
   fi
   make_matrix affinity $1 $2 $3 $4 ${options}
 }
-make_destance_matrix(){
+make_distance_matrix(){
   if [[ $# -eq 5 ]]; then
     local options=$5
   else
     local options=
   fi
-  make_matrix destance $1 $2 $3 $4 ${options}
+  make_matrix distance $1 $2 $3 $4 ${options}
 }
 
 
