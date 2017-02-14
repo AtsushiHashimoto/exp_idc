@@ -25,6 +25,13 @@ def calc_stsc_metric(X):
     W = [[np.exp(-d*d/(sigma[i]*sigma[j])) for i,d in enumerate(ds)] for j,ds in enumerate(D)]
     return np.array(W)
 
+def calc_data_driven_scale_unit(X,scale_unit):
+    D = sm.pairwise.pairwise_distances(X, metric='euclidean')
+    if scale_unit=='median':
+        return np.median(D)
+    else:
+        return find_nth_smallest(np.ravel(D),int(scale_unit))
+
 def main(args):
     src_dir = args.src_dir
     dest_dir = args.dest_dir
@@ -49,6 +56,7 @@ def main(args):
             if args.gamma==None:
                 W = calc_stsc_metric(X)
             else:
+
                 W = sm.pairwise.rbf_kernel(X,gamma=args.gamma)
         elif args.metric=='cosine':
             W = sm.pairwise.cosine_similarity(X)
@@ -95,10 +103,20 @@ parser.add_argument('--gamma', \
         action='store', \
         nargs=None, \
         const=None, \
-        default=None, \
+        default=1.0, \
         type=float, \
         choices=None, \
         help='gamma for rbf_kernel.', \
+        metavar=None)
+
+parser.add_argument('-s','--scale_unit', \
+        action='store', \
+        nargs=None, \
+        const=None, \
+        default='median', \
+        type=str, \
+        choices=None, \
+        help='Strategy to obtain a data-driven scale unit lamda (gamma*lamda is used as sigma rbf kernel). "median" or an int value (to use the n-th largest distance). (default:median)', \
         metavar=None)
 
 

@@ -4,8 +4,6 @@ cd $(dirname ${BASH_SOURCE[0]})/../
 
 source scripts/routines.sh
 
-#target_datasets=(test face)
-#target_datasets=face preid
 
 if [ $# -lt 2 ]; then
   echo "USAGE: sh ${BASH_SOURCE[0]} root_data_dir file_generate_command(ex. \"seq -f X_%03g.csv 0 99)\""
