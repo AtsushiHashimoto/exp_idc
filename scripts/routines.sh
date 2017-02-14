@@ -24,7 +24,7 @@ exec_command(){
   comm=$1
 
   # if len(args)>1 and File.exists($2) and OVERWRITE==0
-  if [ $# -gt 1 -a ${OVERWRITE} -eq 0 ]; then
+  if [ $# -gt 1 -a ${OVERWRITE} -eq 0 -a ${QSUB} -eq 1 ]; then
     local tar_num=$($2)
     if [[ ${tar_num} -eq 0 ]]; then
       # skip execution

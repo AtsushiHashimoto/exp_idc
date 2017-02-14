@@ -2,7 +2,7 @@
 # coding: utf-8
 
 DESCRIPTION="This script do sparse encoding."
-from memory_profiler import profile
+#from memory_profiler import profile
 
 import numpy as np
 import argparse
@@ -40,8 +40,7 @@ def my_sparse_encode(X,alpha,method,n_references):
   X_sparse = np.array(X_sparse)
   return X_sparse
 
-
-@profile
+#@profile
 def main(args):
     src_dir = args.src_dir
     dest_dir = args.dest_dir

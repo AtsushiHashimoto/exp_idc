@@ -8,3 +8,5 @@ QSUB=0
 # EXE=echo to print command, "sh\ -c" for execution.
 #EXE=sh\ -c
 EXE=echo
+
+TARGET_DATASETS=test

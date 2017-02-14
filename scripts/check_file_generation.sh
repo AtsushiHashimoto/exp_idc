@@ -8,7 +8,7 @@ source scripts/routines.sh
 #target_datasets=face preid
 
 if [ $# -lt 2 ]; then
-  echo "USAGE: sh ${BASH_SOURCE[0]} root_data_dir file_template"
+  echo "USAGE: sh ${BASH_SOURCE[0]} root_data_dir file_generate_command(ex. \"seq -f X_%03g.csv 0 99)\""
   exit
 fi
 root_data_dir=$1
@@ -40,7 +40,7 @@ for dir in `find ${root_data_dir} -type d`; do
 
   if [ ${is_any_file} -eq 0 ]; then
     echo "### ${dir} contains no target files."
-    rmdir ${dir}
+    #rmdir ${dir}
     continue
   fi
 

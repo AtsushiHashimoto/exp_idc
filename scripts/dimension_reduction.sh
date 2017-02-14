@@ -6,7 +6,8 @@ source scripts/routines.sh
 
 #target_datasets=(test face)
 #target_datasets=face preid
-target_datasets=`seq -f "face_feature_%02g" 5 15` 
+#target_datasets=`seq -f "face_feature_%02g" 5 15` 
+target_datasets=`seq -f "preid_%02g" 4 4 12` 
 # dimension reduction
 for exp in ${target_datasets}; do
   #for alg in pca nmf; do
