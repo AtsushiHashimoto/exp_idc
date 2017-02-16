@@ -25,6 +25,7 @@ def main(args):
     tc=TargetCounter(src_pat,tar_template,src_dir,dest_dir)
     target_ids,src_files = tc.listup_targets()
     n_targets = len(target_ids)
+
     if args.count_targets:
         print(len(target_ids))
         sys.exit()
@@ -41,7 +42,7 @@ def main(args):
         sys.exit()
     for id,src_file in zip(target_ids,src_files):
         dest_file = "%s/%s"%(args.dest_dir,tc.id2destfile(id))
-        print(id,src_file,dest_file)
+        #print(id,src_file,dest_file)
         X=np.loadtxt(src_file,delimiter=",")
         model.fit(X)
         X_ = model.transform(X)
@@ -106,7 +107,6 @@ parser.add_argument('--count_targets',\
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    logger = logging.getLogger(__file__)
     logger.setLevel(logging.DEBUG)
     sh = logging.StreamHandler()
     logger.addHandler(sh)
