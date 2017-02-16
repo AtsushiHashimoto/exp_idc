@@ -69,16 +69,16 @@ get_original_data_dir(){
 get_matrix_dir(){
   local exp=$1
   if [ $# -eq 2 ]; then
-    local subpath=$2/
+    local subpath=/$2
   else
     local subpath=
   fi
-  local dir=${MAT_DIR}/${exp}/${subpath}
+  local dir=${MAT_DIR}/${exp}${subpath}
   echo ${dir}
 }
 get_clustering_result_dir(){
   local exp=$1
-  local dir=${RESULTS_DIR}/${exp}/
+  local dir=${RESULTS_DIR}/${exp}
   echo ${dir}
 }
 
@@ -86,17 +86,17 @@ get_result_dir(){
   local exp=$1
   local trial=$2
   if [ $# -eq 3 ]; then
-    local subpath=$3/
+    local subpath=/$3
   else
     local subpath=
   fi
-  local dir=${RESULTS_DIR}/${exp}/${subpath}
+  local dir=${RESULTS_DIR}/${exp}${subpath}
   echo ${dir}
 }
 
-do_clustering(){
-  local exp=$1
-  local metric=$2
+clustering(){
+  local dataset=$1
+  local algorithm=$2
   local src_subpath=$3
   local dest_subpath=$4
   if [[ $# -eq 5 ]]; then
@@ -105,7 +105,7 @@ do_clustering(){
     local options=
   fi
 
-  local dest_dir=$(get_clustering_result_dir ${exp} ${dest_subpath})
+  local dest_dir=$(get_clustering_result_dir ${exp} ${subpath})
   mkdir -p ${dest_dir}
   local src_dir=$(get_matrix_dir ${exp} ${src_subpath})
   local count_command="python tools/do_clustering.py ${src_dir} ${dest_dir} --count_targets"
@@ -187,4 +187,13 @@ sparse_encode(){
   #196MB for 128dim x 1000samples
   local count_command="python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --count_targets"
   exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir}" "${count_command}"
+}
+
+get_cluster_num(){
+  n_clusters=echo $1 | awk -F'_' '{print $2}'
+  if [ -z ${n_clusters}  ]; then
+    # ERROR: no cluster number is obtained from dataset name.
+    exit
+  fi
+  echo ${n_clusters}
 }
