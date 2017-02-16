@@ -11,6 +11,7 @@ import logging
 import os.path
 import csv
 import random
+import json
 
 try:
    import cPickle as pickle
@@ -46,13 +47,14 @@ def make_test_db(src_dir,dest_dir):
         save_data(X,y,dest_X_file,dest_y_file)
 
 def make_face_db(src_dir,dest_dir,n_clusters):
-    files = sorted(glob2.glob("%s/num%s/test*_sample_feature.csv"%(src_dir,n_clusters)))
+    files = sorted(glob2.glob("%s/num%02d/test*_sample_feature.csv"%(src_dir,n_clusters)))
+    #print(files)
     for i,file in enumerate(files):
         dest_X_file,dest_y_file = check_dest_files(dest_dir,i)
         if None == dest_X_file:
             continue
         X = np.loadtxt(file,delimiter=',')
-        src_y_file = "%s/num%s/test%02d_groundtruth.txt"%(src_dir,n_clusters,i)
+        src_y_file = "%s/num%02d/test%02d_groundtruth.txt"%(src_dir,n_clusters,i)
         data = csv.reader(open(src_y_file,'r'))
         y = [int(r[2]) for r in data]
         save_data(X,y,dest_X_file,dest_y_file)
@@ -65,12 +67,52 @@ def make_preid_db(src_dir,dest_dir,n_clusters):
     Xys = [[np.load(X),np.load(y)] for X,y in zip(Xs,ys)]
     for t in range(0,100):
         dest_X_file,dest_y_file = get_dest_files(dest_dir,t)
+        if None == dest_X_file:
+            continue
         random.shuffle(Xys)
-        Xys_t = Xys[0:n_clusters]
-        sample_num = max(1,int(np.random.normal(8,1)))
-        X_ = np.r_[flatten([X[0:min(sample_num,len(X))] for X,y in Xys_t])]
-        y_ = np.r_[flatten([y[0:min(sample_num,len(y))] for X,y in Xys_t])]
-        save_data(X_,y_,dest_X_file,dest_y_file)
+        # inliers
+        X_ = []
+        y_ = []
+        meta = {'inliers':[],'outliers':[]}
+        for i,(X,y) in enumerate(Xys[:n_clusters]):
+            random.shuffle(X)
+            #print("X:",X)
+            #print("y:",y)
+
+            sample_num = max(1,int(np.random.normal(8,1)))
+            X_.append(np.array(X[0:max(1,min(sample_num,len(X)))]))
+            y_ += [i+1]*sample_num
+            meta['inliers'].append({'person_id':int(y[0]),'sample_num':sample_num})
+        # outliers
+        Xys_t_out = Xys[n_clusters:]
+        outlier_person_num = len(Xys_t_out)
+        # 0 < outlier_num <= 2*outlier_person_num
+        outlier_num = min(max(1,int(np.random.normal(8,1))),2*outlier_person_num)
+        #print("outlier_person_num=",outlier_person_num)
+        #print("outlier_num       =",outlier_num)
+        for i,(X,y) in enumerate(Xys_t_out):
+            if i >= outlier_num:
+                break
+            #print("i,outlier_num",i,outlier_num)
+            #print("outlier_person_num:",outlier_person_num)
+            #print("outlier_num%outlier_person_num",outlier_num%outlier_person_num)
+            #print("(i<outlier_num%outlier_person_num))",(i<outlier_num%outlier_person_num))
+            sample_num = 1
+            if outlier_num>outlier_person_num:
+                sample_num += (i<outlier_num%outlier_person_num)
+            #print("n_samples:", sample_num)
+            random.shuffle(X)
+            X_.append(np.mat(X[0:sample_num]))
+            y_ += [0]*sample_num
+            meta['outliers'].append({'person_id':int(y[0]),'sample_num':sample_num})
+        #for X in X_:
+        #    print("X.shape",X.shape)
+        X__ = np.vstack(X_)
+        #print("X__.shape",X__.shape)
+        save_data(X__,np.array(y_),dest_X_file,dest_y_file)
+        with open("%s/meta_%03d.json"%(dest_dir,t), 'w') as outfile:
+            #print(meta)
+            json.dump(meta, outfile)
 
 def main(args,logger):
     src_dir=args.src_dir
