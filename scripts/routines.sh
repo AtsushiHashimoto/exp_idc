@@ -3,6 +3,11 @@
 
 
 source scripts/my_env.sh
+# path to pca data.
+pca_paths=$(for dim in ${dr_dims[@]}; do echo "pca/${dim}"; done)
+# path to sparse encoding data
+se_paths=$(for alpha in ${se_alphas[@]}; do echo "sparse_encode/${alpha}"; done)
+
 
 ORIG_DATA_DIR=external
 EXP_DIR=exp
@@ -14,7 +19,7 @@ RESULTS_DIR=${EXP_DIR}/results
 #TRIALS=`seq -f "%03g" 0 0`
 
 
-QSUB_DIR=${EXP_DIR}/qsub
+QSUB_DIR=${DATASET_DIR}/qsub
 QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
 UserGroup=gr20111
 Queue=gr20100b
@@ -54,43 +59,49 @@ exec_command(){
 }
 
 get_data_dir(){
-  local exp=$1
+  local dataset=$1
   if [ $# -eq 2 ]; then
     local subpath=$2/
   else
     local subpath=
   fi
-  local dir=${DATA_DIR}/${exp}/${subpath}
+  local dir=${DATA_DIR}/${dataset}/${subpath}
   echo ${dir}
 }
 get_original_data_dir(){
   echo $(get_data_dir $1 raw)
 }
 get_matrix_dir(){
-  local exp=$1
+  local dataset=$1
   if [ $# -eq 2 ]; then
     local subpath=/$2
   else
     local subpath=
   fi
-  local dir=${MAT_DIR}/${exp}${subpath}
+  local dir=${MAT_DIR}/${dataset}${subpath}
   echo ${dir}
 }
+
 get_clustering_result_dir(){
-  local exp=$1
-  local dir=${RESULTS_DIR}/${exp}
+  local dataset=$1
+  if [ $# -eq 2 ]; then
+    local subpath=/$2
+  else
+    local subpath=
+  fi
+
+  local dir=${RESULTS_DIR}/${dataset}${subpath}
   echo ${dir}
 }
 
 get_result_dir(){
-  local exp=$1
-  local trial=$2
-  if [ $# -eq 3 ]; then
-    local subpath=/$3
+  local dataset=$1
+  if [ $# -eq 2 ]; then
+    local subpath=/$2
   else
     local subpath=
   fi
-  local dir=${RESULTS_DIR}/${exp}${subpath}
+  local dir=${RESULTS_DIR}${subpath}
   echo ${dir}
 }
 
@@ -105,11 +116,15 @@ clustering(){
     local options=
   fi
 
-  local dest_dir=$(get_clustering_result_dir ${exp} ${subpath})
+  if [[ $(elementsIn ${algorithm} "${TARGET_ALGORITHMS[@]}") == "out" ]]; then
+    return
+  fi
+
+  local dest_dir=$(get_clustering_result_dir ${dataset} ${dest_subpath})
   mkdir -p ${dest_dir}
-  local src_dir=$(get_matrix_dir ${exp} ${src_subpath})
+  local src_dir=$(get_matrix_dir ${dataset} ${src_subpath})
   local count_command="python tools/do_clustering.py ${src_dir} ${dest_dir} --count_targets"
-  exec_command "python tools/do_clustering.py ${src_dir} ${dest_dir} ${options}" "${count_command}"
+  exec_command "python tools/do_clustering.py ${algorithm} ${src_dir} ${dest_dir} ${options}" "${count_command}"
 }
 
 
@@ -117,7 +132,7 @@ cross_validation(){
   local dataset=$1
   local algorithm=$2
   local src_subpath=$3
-  local src_dir=$(get_matrix_dir ${exp} ${src_subpath})
+  local src_dir=$(get_matrix_dir ${dataset} ${src_subpath})
   local dest_dir=${src_dir}
   local count_command="python tools/cross_validation.py ${src_dir} ${dest_dir} --count_targets"
   exec_command "python tools/cross_validation.py ${src_dir} ${dest_dir} --algorithm ${algorithm}" "${count_command}"
@@ -126,7 +141,7 @@ cross_validation(){
 
 make_matrix(){
   local type=$1
-  local exp=$2
+  local dataset=$2
   local metric=$3
   local src_subpath=$4
   local metric_name=$5
@@ -138,9 +153,9 @@ make_matrix(){
     local options=
   fi
 
-  local dest_dir=$(get_matrix_dir ${exp} ${dest_subpath})
+  local dest_dir=$(get_matrix_dir ${dataset} ${dest_subpath})
   mkdir -p ${dest_dir}
-  local src_dir=$(get_data_dir ${exp} ${src_subpath})
+  local src_dir=$(get_data_dir ${dataset} ${src_subpath})
   local count_command="python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} --count_targets"
   #echo ${count_command}
   exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} ${options}" "${count_command}"
@@ -165,35 +180,35 @@ make_distance_matrix(){
 
 
 reduce_dimension(){
-  local exp=$1
+  local dataset=$1
   local alg=$2
   local dim=$3
 
-  local dest_dir=$(get_data_dir ${exp} ${alg}/${dim})
+  local dest_dir=$(get_data_dir ${dataset} ${alg}/${dim})
   mkdir -p ${dest_dir}
-  local src_dir=$(get_original_data_dir ${exp})
+  local src_dir=$(get_original_data_dir ${dataset})
 
   local count_command="python tools/reduce_dimension.py ${dim} ${src_dir} ${dest_dir} --count_targets"
   exec_command "python tools/reduce_dimension.py ${dim} ${src_dir} ${dest_dir} --algorithm ${alg}" "${count_command}"
 }
 
 sparse_encode(){
-  local exp=$1
+  local dataset=$1
   local alpha=$2
 
-  local dest_dir=$(get_data_dir ${exp} sparse_encode/${alpha})
+  local dest_dir=$(get_data_dir ${dataset} sparse_encode/${alpha})
   mkdir -p ${dest_dir}
-  local src_dir=$(get_original_data_dir ${exp})
+  local src_dir=$(get_original_data_dir ${dataset})
   #196MB for 128dim x 1000samples
   local count_command="python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --count_targets"
   exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir}" "${count_command}"
 }
 
 get_cluster_num(){
-  n_clusters=echo $1 | awk -F'_' '{print $2}'
-  if [ -z ${n_clusters}  ]; then
-    # ERROR: no cluster number is obtained from dataset name.
-    exit
-  fi
-  echo ${n_clusters}
+  echo `echo $1 | awk -F'_' '{print $2}'`
+}
+elementsIn(){
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && echo "in"; done
+  echo "out"
 }
