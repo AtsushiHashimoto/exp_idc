@@ -201,7 +201,7 @@ sparse_encode(){
   local src_dir=$(get_original_data_dir ${dataset})
   #196MB for 128dim x 1000samples
   local count_command="python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --count_targets"
-  exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir}" "${count_command}"
+  exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --method lasso_cd" "${count_command}"
 }
 
 get_cluster_num(){
