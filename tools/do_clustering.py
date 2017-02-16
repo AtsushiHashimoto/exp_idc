@@ -20,10 +20,10 @@ import self_tuning_spectral_clustering
 @profile
 def main(args):
     src_dir = args.src_dir
-    dist_dir = args.dist_dir
+    dest_dir = args.dest_dir
     src_pat = "X_(\d{3}).csv$"
     tar_template = "y_%s.dat"
-    tc=TargetCounter(src_pat,tar_template,src_dir,dist_dir)
+    tc=TargetCounter(src_pat,tar_template,src_dir,dest_dir)
     target_ids,src_files = tc.listup_targets()
     n_targets = len(target_ids)
     if args.count_targets:
@@ -38,7 +38,7 @@ def main(args):
     for t in targets:
         X=np.load("%s/X_%s.csv"%(src_dir,t))
         y=model.fit_predict(X)
-        np.save("%s/%s"%(dist_dir,id2distfile(t)),y)
+        np.save("%s/%s"%(dest_dir,id2destfile(t)),y)
 
 def get_model(args):
     alg = args.algorithm
@@ -55,15 +55,6 @@ def get_model(args):
 
 
 parser = argparse.ArgumentParser(description=DESCRIPTION)
-parser.add_argument('n_clusters' \
-        action='store', \
-        nargs=None, \
-        const=None, \
-        default=None, \
-        type=int, \
-        choices=None, \
-        help='Number of clusters.', \
-        metavar=None)
 
 parser.add_argument('src_dir', \
         action='store', \
@@ -75,7 +66,7 @@ parser.add_argument('src_dir', \
         help='Directory path where the source data are located.', \
         metavar=None)
 
-parser.add_argument('dist_dir', \
+parser.add_argument('dest_dir', \
         action='store', \
         nargs=None, \
         const=None, \
@@ -85,6 +76,15 @@ parser.add_argument('dist_dir', \
         help='Directory path where the formatted data will be located.', \
         metavar=None)
 
+parser.add_argument('--n_clusters' \
+        action='store', \
+        nargs=None, \
+        const=None, \
+        default=None, \
+        type=int, \
+        choices=None, \
+        help='Number of clusters.', \
+        metavar=None)
 
 
 
