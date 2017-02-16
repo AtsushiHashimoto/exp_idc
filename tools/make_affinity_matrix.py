@@ -59,7 +59,8 @@ def main(args):
 
                 W = sm.pairwise.rbf_kernel(X,gamma=args.gamma)
         elif args.metric=='cosine':
-            W = sm.pairwise.cosine_similarity(X)
+            W = (sm.pairwise.cosine_similarity(X)+1.0)/2 # normalize the affinity to [0,1]
+            W[W<0]=0
         else:
             logger.warn("unknown metric '%s'."%args.metric)
         #W = sm.pairwise.pairwise_distances(X, Y=None, metric=args.metric)
