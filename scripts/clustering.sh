@@ -4,7 +4,6 @@ cd $(dirname ${BASH_SOURCE[0]})/../
 
 source scripts/routines.sh
 
-# affinity calculation
 
 for dataset in ${TARGET_DATASETS}; do
   n_clusters=$(get_cluster_num ${dataset})
@@ -13,7 +12,9 @@ for dataset in ${TARGET_DATASETS}; do
     exit
   fi
 
-  # SC, IDC
+  # Algorithms not listed in ${TARGET_ALGORITHMS} are skipped.
+  # Edit the list in 'my_env.sh'
+  # affinity based clustering methods
   for mat in `find $(get_matrix_dir ${dataset} raw/affinity_\*) -type f|grep W_000.csv`; do
       src_dir=$(dirname ${mat})
       subpath=$(echo ${src_dir}|awk -F"${dataset}/" '{print $2}')
@@ -25,7 +26,6 @@ for dataset in ${TARGET_DATASETS}; do
       clustering ${dataset} MODULARITY ${subpath} ${subpath}/MODULARITY
       clustering ${dataset} SEA ${subpath} ${subpath}/SEA
   done
-  exit
   ####################
 
   # Sparse SC
@@ -45,9 +45,11 @@ for dataset in ${TARGET_DATASETS}; do
     for mat in `find $(get_matrix_dir ${dataset} ${src_type}/distance_\*) -type f|grep W_000.csv`; do
       src_dir=$(dirname ${mat})
       subpath=$(echo ${src_dir}|awk -F"${dataset}/" '{print $2}')
-      for eps in dbscan_epss; do
+      for eps in ${dbscan_epss}; do
         #######
-        clustering ${dataset} DBSCAN ${subpath} ${subpath}/DBSCAN/${eps} "--eps ${eps}"
+        for min_samples in ${dbscan_min_samples}; do
+          clustering ${dataset} DBSCAN ${subpath} ${subpath}/DBSCAN/${eps}/${min_samples} "--eps ${eps} --min_samples ${min_samples}"
+        done
       done
     done
   done

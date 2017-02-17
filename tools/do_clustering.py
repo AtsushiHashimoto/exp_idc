@@ -21,22 +21,15 @@ logger = logging.getLogger(__file__)
 
 # HOW TO ADD NEW algorithm
 # 1. add a process for your algorithm to 'get_model'
-# 2. register your algorithm to the following list if distance based.
-DIST_BASED_ALGORITHMs = ["DBSCAN","STSC"]
-# 3. add a process to 'my_fit_predict' if the algorithm has outlier cluster and the outlier label is not 0.
+# 2. add a process to 'my_fit_predict' if the algorithm has outlier cluster and the outlier label is not 0.
 
-from memory_profiler import profile
-@profile
+#from memory_profiler import profile
+#@profile
 def main(args):
     src_dir = args.src_dir
     dest_dir = args.dest_dir
-    print(dest_dir)
 
-    if args.algorithm in DIST_BASED_ALGORITHMs:
-        src_pat = "D_(\d{3}).csv$"
-    else:
-        src_pat = "W_(\d{3}).csv$"
-
+    src_pat = "W_(\d{3}).csv$"
     tar_template = "y_%s.dat"
     tc=TargetCounter(src_pat,tar_template,src_dir,dest_dir)
     target_ids,src_files = tc.listup_targets()
@@ -95,7 +88,7 @@ def get_model(args):
     elif alg=='SEA':
         pass
     elif alg=='DBSCAN':
-        from sklearn.cluster import dbscan
+        from sklearn.cluster import DBSCAN
         model = DBSCAN(
             eps=args.eps,
             min_samples=args.min_samples,
@@ -173,7 +166,7 @@ parser.add_argument('--eps',\
         action='store', \
         nargs=None, \
         const=None, \
-        default=None, \
+        default=0.5, \
         type=float, \
         choices=None, \
         help='eps for DBSCAN.', \
@@ -183,7 +176,7 @@ parser.add_argument('--min_samples',\
         action='store', \
         nargs=None, \
         const=None, \
-        default=None, \
+        default=3, \
         type=int, \
         choices=None, \
         help='min_samples for DBSCAN.', \
