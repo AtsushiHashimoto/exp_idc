@@ -25,6 +25,9 @@ for dataset in ${TARGET_DATASETS}; do
       clustering ${dataset} SG ${subpath} ${subpath}/SG
       clustering ${dataset} MODULARITY ${subpath} ${subpath}/MODULARITY
       clustering ${dataset} SEA ${subpath} ${subpath}/SEA
+      if [ ${TEST} -eq 1 ]; then
+        break
+      fi
   done
   ####################
 
@@ -35,7 +38,13 @@ for dataset in ${TARGET_DATASETS}; do
       subpath=$(echo ${src_dir}|awk -F"${dataset}/" '{print $2}')
       clustering ${dataset} SC ${subpath} ${subpath}/SSC_N "--n_clusters $(expr ${n_clusters})"
       clustering ${dataset} SC ${subpath} ${subpath}/SSC_N1 "--n_clusters $(expr ${n_clusters} + 1)"
+      if [ ${TEST} -eq 1 ]; then
+        break
+      fi
     done
+    if [ ${TEST} -eq 1 ]; then
+      break
+    fi
   done
 
   # Distance Based Clustering Methods
@@ -49,14 +58,29 @@ for dataset in ${TARGET_DATASETS}; do
         #######
         for min_samples in ${dbscan_min_samples}; do
           clustering ${dataset} DBSCAN ${subpath} ${subpath}/DBSCAN/${eps}/${min_samples} "--eps ${eps} --min_samples ${min_samples}"
+          if [ ${TEST} -eq 1 ]; then
+            break
+          fi
         done
+        if [ ${TEST} -eq 1 ]; then
+          break
+        fi
       done
+      if [ ${TEST} -eq 1 ]; then
+        break
+      fi
     done
+    if [ ${TEST} -eq 1 ]; then
+      break
+    fi
   done
 
   # STSC
   for mat in `find $(get_matrix_dir ${dataset} raw/distance_euclidean) -type f|grep W_000.csv`; do
     clustering ${dataset} STSC ${subpath} ${subpath}/STSC "--n_clusters "
+    if [ ${TEST} -eq 1 ]; then
+      break
+    fi
   done
 
 done
