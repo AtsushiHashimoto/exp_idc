@@ -24,8 +24,5 @@ for dataset in ${TARGET_DATASETS}; do
   for subpath in raw ${pca_paths}; do
     make_distance_matrix ${dataset} cosine ${subpath} distance_cosine
     make_distance_matrix ${dataset} euclidean ${subpath} distance_euclidean
-    for gamma in ${ea_gammas}; do
-      make_affinity_matrix ${dataset} euclidean ${subpath} distance_euclidean/median/${gamma} "--gamma=${gamma} --scale_unit=median"
-    done
   done
 done
