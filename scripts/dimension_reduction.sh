@@ -9,7 +9,7 @@ for dataset in ${TARGET_DATASETS}; do
   #for alg in pca nmf; do
   for alg in pca; do
     #for dim in 32 64 128; do
-    for dim in ${rd_dims}; do
+    for dim in ${dr_dims}; do
       reduce_dimension ${dataset} ${alg} ${dim}
     done
   done
