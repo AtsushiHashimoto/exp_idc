@@ -82,5 +82,7 @@ for dataset in ${TARGET_DATASETS}; do
       break
     fi
   done
-
+  if [ ${TEST} -eq 1 ]; then
+    break
+  fi
 done
