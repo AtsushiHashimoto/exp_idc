@@ -47,7 +47,7 @@ def main(args):
         dest_file = "%s/%s"%(args.dest_dir,tc.id2destfile(id))
         X = np.loadtxt(src_file,delimiter=",")
         y = my_fit_predict(model,X,args)
-        np.savetxt(dest_file,y)
+        np.savetxt(dest_file,y,fmt="%d")
 
 def my_fit_predict(model,X,args):
     alg = args.algorithm
