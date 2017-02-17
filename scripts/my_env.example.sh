@@ -20,4 +20,8 @@ dr_dims=(64)
 se_alphas=`seq -f "%0.2f" 0.05 0.05 1.01`
 
 # dbscan parameters
-dbscan_params=`seq -f "%0.2f" 0.0 0.05 1.01`
+dbscan_epss=`seq -f "%0.2f" 0.05 0.05 1.01`
+dbscan_min_samples=`seq -f "%02g" 1 1 5`
+
+# euclidean affinity metric gamma
+ea_gammas=`seq -f "%0.2f" 0.05 0.05 1.01`
