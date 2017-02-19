@@ -7,6 +7,11 @@ import re
 from os.path import basename
 from os.path import dirname
 import sklearn.metrics as sm
+import numpy as np
+
+
+def criteria():
+    return ['ARI','NRI','MI','AMI','PURITY','F1','COMP','FMS','HS','VMS'] #'HCVM'
 
 class ClusteringEvaluator():
     # src_pat ex.) "^.*/X_(\d{3}).csv$"
@@ -19,7 +24,12 @@ class ClusteringEvaluator():
             self.criteria = None
         self.return_type = return_type
 
+    def type_format(self,y):
+        return y.astype(np.int64)
+
     def evaluate(self, y_gt,y_est):
+        y_gt = self.type_format(y_gt)
+        y_est = self.type_format(y_est)
         scores = {}
         if 'AMI' in self.criteria:
             scores['AMI'] = sm.adjusted_mutual_info_score(y_gt,y_est)
@@ -29,8 +39,8 @@ class ClusteringEvaluator():
             scores['COMP'] = sm.completeness_score(y_gt,y_est)
         if 'FMS' in self.criteria:
             scores['FMS'] = sm.fowlkes_mallows_score(y_gt,y_est)
-        if 'HCVM' in self.criteria:
-            scores['HCVM'] = sm.homogeneity_completeness_v_measure(y_gt,y_est)
+        #if 'HCVM' in self.criteria:
+        #    scores['HCVM'] = sm.homogeneity_completeness_v_measure(y_gt,y_est)
         if 'HS' in self.criteria:
             scores['HS'] = sm.homogeneity_score(y_gt,y_est)
         if 'MI' in self.criteria:
@@ -45,7 +55,7 @@ class ClusteringEvaluator():
         if 'F1' in self.criteria:
             scores['F1'] = self.F1score(y_gt,y_est)
         return self.conv_return_type(scores)
-        
+
     def conv_return_type(self,scores):
         if self.return_type==dict:
             return scores
