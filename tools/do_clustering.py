@@ -43,10 +43,14 @@ def main(args):
         sys.exit()
 
     model = get_model(args)
+    epsilon=0.1**100
     for id,src_file in zip(target_ids,src_files):
         dest_file = "%s/%s"%(args.dest_dir,tc.id2destfile(id))
-        X = np.loadtxt(src_file,delimiter=",")
-        y = my_fit_predict(model,X,args)
+        print(src_file)
+        W = np.loadtxt(src_file,delimiter=",")
+        if 'affinity' in src_dir:
+        	W[W<epsilon]=epsilon
+        y = my_fit_predict(model,W,args)
         np.savetxt(dest_file,y,fmt="%d")
 
 def my_fit_predict(model,X,args):

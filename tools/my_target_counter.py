@@ -16,7 +16,9 @@ class TargetCounter():
         self.dest_dir = dest_dir
 
     def listup_targets(self):
-        src_files = glob2.glob("%s/*"%self.src_dir)
+        src_files = sorted(glob2.glob("%s/*"%self.src_dir))
+        
+
         targets = map(self.extract_trial_id,\
                       src_files)
         temp = [(t,f) for t,f in zip(targets,src_files) if t!=None]
