@@ -26,3 +26,31 @@ for dataset in ${TARGET_DATASETS}; do
     break
   fi
 done
+
+copy_all(){
+  dataset=$1
+  subpath=$2
+  src_dir=$(get_result_dir ${dataset} "${subpath}")
+  dest_dir=$(get_cross_validation_dir ${dataset} ${subpath})
+  mkdir -p ${dest_dir}
+  for file in `find ${src_dir}/*.dat`; do
+    for target in closed_best cross_validated; do
+      dest_file=$(basename ${file%.dat}).${target}.dat
+      cp -f ${file} ${dest_dir}/${dest_file}
+    done
+  done
+}
+
+# copy no param results
+for dataset in ${TARGET_DATASETS}; do
+  metrics=(affinity_stsc affinity_cosine)
+  methods=(SC_N SC_N1 IDC)
+  for metric in ${metrics[@]}; do
+    for method in ${methods[@]}; do
+      copy_all ${dataset} raw/${metric}/${method}
+    done
+  done
+  if [ ${TEST} -eq 1 ]; then
+    break
+  fi
+done
