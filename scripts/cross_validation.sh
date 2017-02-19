@@ -4,13 +4,25 @@ cd $(dirname ${BASH_SOURCE[0]})/../
 
 source scripts/routines.sh
 
-# affinity calculation
 
 for dataset in ${TARGET_DATASETS}; do
-  for src_subpath in affinity_cosine; do
-    cross_validation ${dataset}/sparse_encode ssc ${src_subpath}
-    for dim in 64; do
-      cross_validation ${dataset}/pca/${dim} dbscan ${src_subpath}
+  n_clusters=$(get_cluster_num ${dataset})
+
+  # SC, IDC
+  for alg in SC_N SC_N1 IDC SG; do
+    subpath=raw/affinity_euclidean/median/*/${alg}
+    cross_validation ${dataset} ${subpath}
+  done
+
+  for alg in DBSCAN; do
+    subpath=raw/distance_euclidean/DBSCAN/*/*
+    cross_validation ${dataset} ${subpath}
+    for dim in ${dr_dims}; do
+      subpath=pca/${dim}/distance_euclidean/DBSCAN/*/*
+      cross_validation ${dataset} ${subpath}
     done
   done
+  if [ ${TEST} -eq 1 ]; then
+    break
+  fi
 done
