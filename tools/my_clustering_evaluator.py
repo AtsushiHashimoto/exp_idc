@@ -11,7 +11,7 @@ import numpy as np
 
 
 def criteria():
-    return ['ARI','NRI','MI','AMI','PURITY','F1','COMP','FMS','HS','VMS'] #'HCVM'
+    return ['ARI','NMI','MI','AMI','PURITY','F1','COMP','FMS','HS','VMS'] #'HCVM'
 
 class ClusteringEvaluator():
     # src_pat ex.) "^.*/X_(\d{3}).csv$"
