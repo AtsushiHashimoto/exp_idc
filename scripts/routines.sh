@@ -15,6 +15,7 @@ TEMP_DIR=${EXP_DIR}/temp
 DATA_DIR=${EXP_DIR}/datasets
 MAT_DIR=${EXP_DIR}/matrices
 RESULTS_DIR=${EXP_DIR}/results
+CV_DIR=${EXP_DIR}/cross_validation
 #TRIALS=`seq -f "%03g" 0 99`
 #TRIALS=`seq -f "%03g" 0 0`
 
@@ -82,18 +83,6 @@ get_matrix_dir(){
   echo ${dir}
 }
 
-get_clustering_result_dir(){
-  local dataset=$1
-  if [ $# -eq 2 ]; then
-    local subpath=/$2
-  else
-    local subpath=
-  fi
-
-  local dir=${RESULTS_DIR}/${dataset}${subpath}
-  echo ${dir}
-}
-
 get_result_dir(){
   local dataset=$1
   if [ $# -eq 2 ]; then
@@ -101,8 +90,19 @@ get_result_dir(){
   else
     local subpath=
   fi
-  local dir=${RESULTS_DIR}${subpath}
-  echo ${dir}
+  local dir=${RESULTS_DIR}/${dataset}${subpath}
+  echo "${dir}"
+}
+
+get_cross_validation_dir(){
+  local dataset=$1
+  if [ $# -eq 2 ]; then
+    local subpath=/$2
+  else
+    local subpath=
+  fi
+  local dir=${CV_DIR}/${dataset}${subpath}
+  echo "${dir}"
 }
 
 clustering(){
@@ -120,7 +120,7 @@ clustering(){
     return
   fi
 
-  local dest_dir=$(get_clustering_result_dir ${dataset} ${dest_subpath})
+  local dest_dir=$(get_result_dir ${dataset} ${dest_subpath})
   mkdir -p ${dest_dir}
   local src_dir=$(get_matrix_dir ${dataset} ${src_subpath})
   local count_command="python tools/do_clustering.py ${src_dir} ${dest_dir} --count_targets"
@@ -130,12 +130,14 @@ clustering(){
 
 cross_validation(){
   local dataset=$1
-  local algorithm=$2
-  local src_subpath=$3
-  local src_dir=$(get_matrix_dir ${dataset} ${src_subpath})
-  local dest_dir=${src_dir}
-  local count_command="python tools/cross_validation.py ${src_dir} ${dest_dir} --count_targets"
-  exec_command "python tools/cross_validation.py ${src_dir} ${dest_dir} --algorithm ${algorithm}" "${count_command}"
+  local subpath=$2
+  local dest_dir=$(get_cross_validation_dir ${dataset} $(echo "${subpath}" | sed -e 's#\/\*##g'))
+  mkdir -p ${dest_dir}
+  #local count_command="python tools/cross_validation.py ${src_dir} ${dest_dir} --count_targets"
+  local src_dir=$(get_result_dir ${dataset} "${subpath}")
+  local ground_truth_dir=$(get_original_data_dir ${dataset})
+  local count_command="python tools/cross_validation.py \"${src_dir}\" ${ground_truth_dir} ${dest_dir} --count_targets"
+  exec_command "python tools/cross_validation.py \"${src_dir}\" ${ground_truth_dir} ${dest_dir} --criterion AMI"
 }
 
 
