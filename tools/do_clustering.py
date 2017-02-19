@@ -83,7 +83,14 @@ def get_model(args):
                                   eigen_solver='arpack', \
                                   random_state=None)
     elif alg=='SG':
-        pass
+        import spectral_gap
+        model = spectral_gap.SpectralGap(
+                    max_clusters=self.max_clusters,\
+                    eigen_solver='arpack',\
+                    random_state=None,\
+                    affinity='precomputed',\
+                    assign_labels='discretize',
+                    n_jobs=1)
     elif alg=='STSC':
         import stsc_wrapper
         model = SelfTuningSpectralClustering(n_clusters_max=args.max_clusters)
