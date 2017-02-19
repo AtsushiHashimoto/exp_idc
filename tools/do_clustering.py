@@ -84,15 +84,14 @@ def get_model(args):
                                   random_state=None)
     elif alg=='SG':
         import spectral_gap
-        model = spectral_gap.SpectralGap(
-                    max_clusters=self.max_clusters,\
+        model = spectral_gap.SpectralClusteringSG(
+                    max_clusters=args.max_clusters,\
                     eigen_solver='arpack',\
                     random_state=None,\
                     affinity='precomputed',\
-                    assign_labels='discretize',
-                    n_jobs=1)
+                    assign_labels='discretize')
     elif alg=='STSC':
-        import stsc_wrapper 
+        import stsc_wrapper
         model = stsc_wrapper.SelfTuningSpectralClustering(n_clusters_max=args.max_clusters)
     elif alg=='MODULARITY':
         pass
@@ -156,7 +155,7 @@ parser.add_argument('--min_clusters',\
         action='store', \
         nargs=None, \
         const=None, \
-        default=None, \
+        default=3, \
         type=int, \
         choices=None, \
         help='Minimum number of clusters to set the search range.', \
@@ -166,7 +165,7 @@ parser.add_argument('--max_clusters',\
         action='store', \
         nargs=None, \
         const=None, \
-        default=None, \
+        default=20, \
         type=int, \
         choices=None, \
         help='Maximum number of clusters to set the search range.', \
