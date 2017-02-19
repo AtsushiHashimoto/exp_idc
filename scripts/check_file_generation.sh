@@ -5,15 +5,19 @@ cd $(dirname ${BASH_SOURCE[0]})/../
 source scripts/routines.sh
 
 
-if [ $# -lt 2 ]; then
-  echo "USAGE: sh ${BASH_SOURCE[0]} root_data_dir file_generate_command(ex. \"seq -f X_%03g.csv 0 99)\""
+if [ $# -lt 3 ]; then
+  echo "USAGE: sh ${BASH_SOURCE[0]} root_data_dir file_template(ex. \"X_%03g.csv\" max_num"
   exit
 fi
 root_data_dir=$1
-file_list_generate_command=$2
-# ex) file_list_generate_command=`seq -f ${file_template} 0 99`
+template=$2
+file_max=$3
 
-for dir in `find ${root_data_dir} -type d`; do
+file_list=$(seq -f ${template} 0 ${file_max})
+# ex) file_list_generate_command=`seq -f ${file_template} 0 99`
+#echo "target files: ${file_list}..."
+
+for dir in `find ${root_data_dir}/* -type d`; do
 
   # check if the directory has only directories or not.
   file_num=$(ls -1 ${dir} | wc -l)
@@ -29,23 +33,28 @@ for dir in `find ${root_data_dir} -type d`; do
 
   # check if the directory has target files or not.
   is_any_file=0
-  for file in `${file_list_generate_command}`; do
+  for file in ${file_list}; do
+    #echo ${dir}/${file} 
     if [ -e ${dir}/${file} ]; then
       is_any_file=1
       break
     fi
   done
-
   if [ ${is_any_file} -eq 0 ]; then
-    echo "### ${dir} contains no target files."
+    echo "### ${dir} contains no target files." >&2
     #rmdir ${dir}
     continue
   fi
 
-  for file in `${file_list_generate_command}`; do
+  is_all_file=1
+  for file in ${file_list}; do
     if [ -e ${dir}/${file} ]; then
       continue
     fi
-    echo "!!! ${dir}/${file} not found"
+    is_all_file=0
+    echo "!!! ${dir}/${file} not found" >&2
   done
+  if [ ${is_all_file} -eq 1 ]; then
+    echo "${dir} complete."
+  fi
 done
