@@ -18,6 +18,7 @@ for dataset in ${TARGET_DATASETS}; do
   for mat in `find $(get_matrix_dir ${dataset} raw/affinity_\*) -type f|grep W_000.csv`; do
       src_dir=$(dirname ${mat})
       subpath=$(echo ${src_dir}|awk -F"${dataset}/" '{print $2}')
+      
       clustering ${dataset} SC ${subpath} ${subpath}/SC_N "--n_clusters $(expr ${n_clusters})"
       clustering ${dataset} SC ${subpath} ${subpath}/SC_N1 "--n_clusters $(expr ${n_clusters} + 1)"
       clustering ${dataset} IDC ${subpath} ${subpath}/IDC "--min_clusters 3 --max_clusters 20"
@@ -25,6 +26,7 @@ for dataset in ${TARGET_DATASETS}; do
       clustering ${dataset} SG ${subpath} ${subpath}/SG
       clustering ${dataset} MODULARITY ${subpath} ${subpath}/MODULARITY
       clustering ${dataset} SEA ${subpath} ${subpath}/SEA
+      clustering ${dataset} STSC ${subpath} ${subpath}/STSC "--max_clusters 20"
       if [ ${TEST} -eq 1 ]; then
         break
       fi
