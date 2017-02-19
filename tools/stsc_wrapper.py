@@ -3,6 +3,7 @@
 
 import tempfile
 import subprocess
+import numpy as np
 from os.path import dirname
 
 class SelfTuningSpectralClustering():
@@ -14,11 +15,12 @@ class SelfTuningSpectralClustering():
     def mktemp(self):
         return tempfile.TemporaryFile()
     def fit_predict(self,X):
-        with tempfile.TemporaryFile() as ftemp_out:
-            with tempfile.TemporaryFile() as ftemp:
-                numpy.savetxt(ftemp.name,X,delimiter=',')
-                command="%s %d %s"%(self.exe,self.n_clusters_max,ftemp.name,ftemp_out.name)
-                print(command)
-                subprocess.call( command, shell=True  )
-            y = np.loadtxt(ftemp_out.name,delimiter=',')
+        ftemp_y = tempfile.NamedTemporaryFile()
+        ftemp_X = tempfile.NamedTemporaryFile()
+        np.savetxt(ftemp_X.name,X,delimiter=',')
+        command="%s %d %s %s"%(self.exe,int(self.n_clusters_max),ftemp_X.name,ftemp_y.name)
+        print(command)
+        p = subprocess.call( command, shell=True  )
+        p.wait()
+        y = np.loadtxt(ftemp_y.name,delimiter=',')
         return y
