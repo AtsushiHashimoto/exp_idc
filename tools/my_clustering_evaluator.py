@@ -11,7 +11,7 @@ import numpy as np
 
 
 def criteria():
-    return ['ARI','NRI','MI','AMI','PURITY','F1','COMP','FMS','HS','VMS'] #'HCVM'
+    return ['#Err','ARI','NRI','MI','AMI','PURITY','F1','COMP','FMS','HS','VMS'] #'HCVM'
 
 class ClusteringEvaluator():
     # src_pat ex.) "^.*/X_(\d{3}).csv$"
@@ -31,6 +31,8 @@ class ClusteringEvaluator():
         y_gt = self.type_format(y_gt)
         y_est = self.type_format(y_est)
         scores = {}
+        if '#Err' in self.criteria:
+            scores['#Err'] = self.ErrNumClusters(y_gt,y_est)
         if 'AMI' in self.criteria:
             scores['AMI'] = sm.adjusted_mutual_info_score(y_gt,y_est)
         if 'ARI' in self.criteria:
@@ -71,6 +73,8 @@ class ClusteringEvaluator():
         y_est_bin = y_est > 0
         return sm.f1_score(y_gt_bin,y_est_bin)
 
+    def ErrNumClusters(self,y_gt,y_est):
+        return abs(len(set(y_gt))-len(set(y_est)))
     def purity(self,y_gt,y_est):
         A = np.c_[(y_est,y_gt)]
         n_accurate = 0.
