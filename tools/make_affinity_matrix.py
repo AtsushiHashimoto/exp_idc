@@ -47,7 +47,7 @@ def main(args):
         logger.warn("There are no before-process src files in '%s'"%src_dir)
         sys.exit()
 
-
+    epsilon=0.1**100
     for id,src_file in zip(target_ids,src_files):
         dest_file = "%s/%s"%(args.dest_dir,tc.id2destfile(id))
         #print(id,src_file,dest_file)
@@ -56,14 +56,16 @@ def main(args):
             if args.gamma==None:
                 W = calc_stsc_metric(X)
             else:
-
                 W = sm.pairwise.rbf_kernel(X,gamma=args.gamma)
+                # ensure graph connectivity.
+                W[W<epsilon]=epsilon
+
         elif args.metric=='cosine':
             W = (sm.pairwise.cosine_similarity(X)+1.0)/2 # normalize the affinity to [0,1]
-            W[W<0]=0
         else:
             logger.warn("unknown metric '%s'."%args.metric)
         #W = sm.pairwise.pairwise_distances(X, Y=None, metric=args.metric)
+        W[W<0]=0
         np.savetxt(dest_file,W,delimiter=",")
 
 
