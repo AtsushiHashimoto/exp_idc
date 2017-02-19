@@ -85,8 +85,8 @@ def get_model(args):
     elif alg=='SG':
         pass
     elif alg=='STSC':
-        import stsc_wrapper
-        model = SelfTuningSpectralClustering(n_clusters_max=args.max_clusters)
+        import stsc_wrapper 
+        model = stsc_wrapper.SelfTuningSpectralClustering(n_clusters_max=args.max_clusters)
     elif alg=='MODULARITY':
         pass
     elif alg=='SEA':
