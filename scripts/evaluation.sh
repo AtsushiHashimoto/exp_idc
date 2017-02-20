@@ -32,9 +32,6 @@ for dataset in ${TARGET_DATASETS}; do
       fi
     done
   done
-  if [ ${TEST} -eq 1 ]; then
-    break
-  fi
 
   metrics=(affinity_stsc affinity_cosine)
   methods=(SC_N SC_N1 IDC)
@@ -51,7 +48,4 @@ for dataset in ${TARGET_DATASETS}; do
   for target in cross_validated closed_best; do
     echo "python tools/evaluation.py $(get_original_data_dir ${dataset}) ${EXP_DIR}/summery.${dataset}.${target}.csv -t ${target} ${src_dirs[@]}"
   done
-  if [ ${TEST} -eq 1 ]; then
-    break
-  fi
 done

@@ -40,6 +40,12 @@ def add_results(results,dest):
     return dest
 
 def get_results(src_paths,id,y_gt,scorer):
+    '''
+    for src_path in src_paths:
+        print("%s/y_%s.dat"%(src_path,id))
+        print(scorer.evaluate(y_gt,np.loadtxt("%s/y_%s.dat"%(src_path,id))))
+    '''
+
     results = [(scorer.evaluate(y_gt,np.loadtxt("%s/y_%s.dat"%(src_path,id))),src_path) \
                 for src_path in src_paths]
     '''

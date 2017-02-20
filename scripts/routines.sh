@@ -207,7 +207,7 @@ sparse_encode(){
 }
 
 get_cluster_num(){
-  echo `echo $1 | awk -F'_' '{print $2}'`
+  echo `echo $1 | awk -F'_' '{print $NF}'`
 }
 elementsIn(){
   local e
