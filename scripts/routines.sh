@@ -62,11 +62,11 @@ exec_command(){
 get_data_dir(){
   local dataset=$1
   if [ $# -eq 2 ]; then
-    local subpath=$2/
+    local subpath=/$2
   else
     local subpath=
   fi
-  local dir=${DATA_DIR}/${dataset}/${subpath}
+  local dir=${DATA_DIR}/${dataset}${subpath}
   echo ${dir}
 }
 get_original_data_dir(){
