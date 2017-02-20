@@ -4,6 +4,26 @@ cd $(dirname ${BASH_SOURCE[0]})/../
 
 source scripts/routines.sh
 
+# make preid_massive_outliers
+temp_dir=$(get_data_dir preid_mo format)
+mkdir -p ${temp_dir}
+for dir in $(find external/preid_mo/* -type d); do
+  #echo ${dir}
+  basename=$(basename ${dir})
+  if [ ${basename} == "shinpuhkan.4.1_jstl_fc7_bn" ]; then
+    python tools/format_preid.py ${dir} ${temp_dir}
+    continue
+  fi
+  python tools/format_preid_outliers.py ${dir} ${temp_dir}/X_outliers_${basename}.npy
+done
+
+for rate_outliers in 0.5 1.0 3.0; do
+  dist_dir=$(get_original_data_dir preid_mo_${rate_outliers}_12)
+  #echo ${dist_dir}
+  mkdir -p ${dist_dir}
+  python tools/make_dbs.py preid_mo ${temp_dir} ${dist_dir} --n_clusters 12 --rate_outliers ${rate_outliers}
+done
+
 # make test dataset.
 # n_clusters=5
 dist_dir=$(get_original_data_dir test_05)

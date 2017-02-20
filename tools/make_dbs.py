@@ -9,9 +9,8 @@ import glob2
 import gzip
 import logging
 import os.path
-import csv
-import random
 import json
+import random
 
 try:
    import cPickle as pickle
@@ -114,15 +113,59 @@ def make_preid_db(src_dir,dest_dir,n_clusters):
             #print(meta)
             json.dump(meta, outfile)
 
+def make_preid_mo_db(src_dir,dest_dir,n_clusters,rate_outliers):
+    flatten = lambda l: [item for sublist in l for item in sublist]
+
+    Xs = sorted(glob2.glob("%s/X_*.npy"%src_dir))
+    ys = sorted(glob2.glob("%s/y_*.npy"%src_dir))
+    Xys = [[np.load(X),np.load(y)] for X,y in zip(Xs,ys)]
+
+    OutlierFiles = sorted(glob2.glob("%s/X_outliers*.npy"%src_dir))
+    Outliers_temp = [np.load(f) for f in OutlierFiles]
+    X_outliers = np.vstack(Outliers_temp)
+
+    outlier_num = int(8*n_clusters*rate_outliers)
+    for t in range(0,5):
+        dest_X_file,dest_y_file = get_dest_files(dest_dir,t)
+        if None == dest_X_file:
+            continue
+        random.shuffle(Xys)
+        # inliers
+        X_ = []
+        y_ = []
+        meta = {'inliers':[],'outliers':[]}
+        for i,(X,y) in enumerate(Xys[:n_clusters]):
+            random.shuffle(X)
+            #print("X:",X)
+            #print("y:",y)
+
+            sample_num = max(1,int(np.random.normal(8,1)))
+            X_.append(np.array(X[0:max(1,min(sample_num,len(X)))]))
+            y_ += [i+1]*sample_num
+            meta['inliers'].append({'person_id':int(y[0]),'sample_num':sample_num})
+        X__ = np.vstack(X_)
+
+        np.random.shuffle(X_outliers)
+        #for X in X_:
+        #    print("X.shape",X.shape)
+        X_ = np.r_[X__, X_outliers[:outlier_num]]
+        y_+= [0]*outlier_num
+        #print("X__.shape",X__.shape)
+        save_data(X_,np.array(y_),dest_X_file,dest_y_file)
+
+
 def main(args,logger):
     src_dir=args.src_dir
     dest_dir=args.dest_dir
+
     if args.type=='test':
         make_test_db(src_dir,dest_dir)
     elif args.type=='face_feature':
         make_face_db(src_dir,dest_dir,args.n_clusters)
     elif args.type=='preid':
         make_preid_db(src_dir,dest_dir,args.n_clusters)
+    elif args.type=='preid_mo':
+        make_preid_mo_db(src_dir,dest_dir,args.n_clusters,args.rate_outliers)
     else:
         logger.warn("Unknown dataset type: '%s'."%args.type)
 
@@ -167,6 +210,16 @@ parser.add_argument('-n','--n_clusters', \
         type=int, \
         choices=None, \
         help='Number of clusters',
+        metavar=None)
+
+parser.add_argument('-o','--rate_outliers', \
+        action='store', \
+        nargs='?', \
+        const=None, \
+        default=None, \
+        type=float, \
+        choices=None, \
+        help='Rate of outliers',
         metavar=None)
 
 
