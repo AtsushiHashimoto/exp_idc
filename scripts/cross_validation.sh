@@ -34,7 +34,7 @@ copy_all(){
   dest_dir=$(get_cross_validation_dir ${dataset} ${subpath})
   mkdir -p ${dest_dir}
   for file in `find ${src_dir}/*.dat`; do
-    for target in closed_best cross_validated; do
+    for target in closed_best cross_validated random; do
       dest_file=$(basename ${file%.dat}).${target}.dat
       cp -f ${file} ${dest_dir}/${dest_file}
     done
