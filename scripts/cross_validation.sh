@@ -14,9 +14,11 @@ for dataset in ${TARGET_DATASETS}; do
     cross_validation ${dataset} ${subpath}
   done
 
-  for alg in DBSCAN; do
+  for alg in DBSCAN STSC; do
     subpath=raw/distance_euclidean/DBSCAN/*/*
     cross_validation ${dataset} ${subpath}
+  done
+  for alg in DBSCAN; do
     for dim in ${dr_dims}; do
       subpath=pca/${dim}/distance_euclidean/DBSCAN/*/*
       cross_validation ${dataset} ${subpath}
@@ -44,7 +46,7 @@ copy_all(){
 # copy no param results
 for dataset in ${TARGET_DATASETS}; do
   metrics=(affinity_stsc affinity_cosine)
-  methods=(SC_N SC_N1 IDC)
+  methods=(SC_N SC_N1 IDC SG)
   for metric in ${metrics[@]}; do
     for method in ${methods[@]}; do
       copy_all ${dataset} raw/${metric}/${method}
