@@ -18,7 +18,6 @@ for dataset in ${TARGET_DATASETS}; do
     done
   done
 done
-exit
 
 for dataset in ${TARGET_DATASETS}; do
   for subpath in raw ${pca_paths}; do

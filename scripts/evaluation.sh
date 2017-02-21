@@ -10,6 +10,10 @@ for dataset in ${TARGET_DATASETS}; do
 
   # SC, IDC
   for alg in SC_N SC_N1 IDC SG; do
+    if [[ $(elementsIn ${alg} "${TARGET_ALGORITHMS[@]}") == "out" ]]; then
+      continue
+    fi
+
     subpath=raw/affinity_euclidean/median/${alg}
     src_dir=$(get_cross_validation_dir ${dataset} ${subpath})
     if [ -e ${src_dir} ]; then
@@ -18,6 +22,9 @@ for dataset in ${TARGET_DATASETS}; do
   done
 
   for alg in DBSCAN; do
+    if [[ $(elementsIn ${alg} "${TARGET_ALGORITHMS[@]}") == "out" ]]; then
+      continue
+    fi
 
     subpath=raw/distance_euclidean/DBSCAN
     src_dir=$(get_cross_validation_dir ${dataset} ${subpath})
@@ -37,6 +44,9 @@ for dataset in ${TARGET_DATASETS}; do
   methods=(SC_N SC_N1 IDC)
   for metric in ${metrics[@]}; do
     for method in ${methods[@]}; do
+      if [[ $(elementsIn ${method} "${TARGET_ALGORITHMS[@]}") == "out" ]]; then
+        continue
+      fi
       subpath=raw/${metric}/${method}
       src_dir=$(get_cross_validation_dir ${dataset} ${subpath})
       if [ -e ${src_dir} ]; then
@@ -46,6 +56,6 @@ for dataset in ${TARGET_DATASETS}; do
   done
 
   for target in cross_validated closed_best; do
-    echo "python tools/evaluation.py $(get_original_data_dir ${dataset}) ${EXP_DIR}/summery.${dataset}.${target}.csv -t ${target} ${src_dirs[@]}"
+    python tools/evaluation.py $(get_original_data_dir ${dataset}) ${EXP_DIR}/summery.${dataset}.${target}.csv -t ${target} ${src_dirs[@]}
   done
 done
