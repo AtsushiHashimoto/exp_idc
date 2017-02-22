@@ -19,8 +19,8 @@ CV_DIR=${EXP_DIR}/cross_validation
 #TRIALS=`seq -f "%03g" 0 99`
 #TRIALS=`seq -f "%03g" 0 0`
 
-COMPLETE_LOG=$(basename ${BASH_SOURCE[0]}).completion.log
-ERROR_LOG=$(basename ${BASH_SOURCE[0]}).error.log
+COMPLETE_LOG=$(basename ${BASH_SOURCE[1]}).completion.log
+ERROR_LOG=$(basename ${BASH_SOURCE[1]}).error.log
 
 
 exist_sequence_file(){
