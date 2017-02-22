@@ -19,8 +19,8 @@ CV_DIR=${EXP_DIR}/cross_validation
 #TRIALS=`seq -f "%03g" 0 99`
 #TRIALS=`seq -f "%03g" 0 0`
 
-COMPLETE_LOG=$(basename ${BASH_SOURCE[0]}).completion.log
-ERROR_LOG=$(basename ${BASH_SOURCE[0]}).error.log
+COMPLETE_LOG=$(basename ${BASH_SOURCE[1]}).completion.log
+ERROR_LOG=$(basename ${BASH_SOURCE[1]}).error.log
 
 
 exist_sequence_file(){
@@ -51,11 +51,17 @@ exec_command(){
     is_completed=$(exist_sequence_file ${dest_dir} ${file_template})
     if [[ ${is_completed} -eq 1 ]]; then
       # skip execution
+      if [ ${VERBOSE} -eq 1 ]; then
+        echo "skip ${dest_dir}" >&2
+      fi
       return
     fi
   fi
 
   if [ ${EXECUTE} -eq 1 ]; then
+    if [ ${VERBOSE} -eq 1 ]; then
+      echo "do ${dest_dir}" >&2
+    fi
     sh -c ${comm}
     if [ $? -gt 0 ]; then
       # エラー処理
