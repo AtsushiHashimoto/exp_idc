@@ -11,6 +11,7 @@ import logging
 import os.path
 import json
 import random
+import csv
 
 try:
    import cPickle as pickle

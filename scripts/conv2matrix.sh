@@ -3,9 +3,9 @@
 cd $(dirname ${BASH_SOURCE[0]})/../
 
 AFF_EUCLID_MEDIAN=0
-AFF_EUCLID_ABS=1
+AFF_EUCLID_ABS=0
 AFF_COSINE=0
-AFF_STSC=0
+AFF_STSC=1
 DIFF_COSINE=0
 DIFF_EUCLID=0
 # above settings can be overwrite in scirpts/my_env.sh if necessary

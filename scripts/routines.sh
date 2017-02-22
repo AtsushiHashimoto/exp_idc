@@ -147,7 +147,6 @@ clustering(){
   local dest_dir=$(get_result_dir ${dataset} ${dest_subpath})
   mkdir -p ${dest_dir}
   local src_dir=$(get_matrix_dir ${dataset} ${src_subpath})
-  local count_command="python tools/do_clustering.py ${src_dir} ${dest_dir} --count_targets"
   exec_command "python tools/do_clustering.py ${algorithm} ${src_dir} ${dest_dir} ${options}" ${dest_dir} y_SEQ.dat
 }
 
@@ -157,7 +156,6 @@ cross_validation(){
   local subpath=$2
   local dest_dir=$(get_cross_validation_dir ${dataset} $(echo "${subpath}" | sed -e 's#\/\*##g'))
   mkdir -p ${dest_dir}
-  #local count_command="python tools/cross_validation.py ${src_dir} ${dest_dir} --count_targets"
   local src_dir=$(get_result_dir ${dataset} "${subpath}")
   local ground_truth_dir=$(get_original_data_dir ${dataset})
   exec_command "python tools/cross_validation.py \"${src_dir}\" ${ground_truth_dir} ${dest_dir} --criterion AMI"
@@ -181,8 +179,6 @@ make_matrix(){
   local dest_dir=$(get_matrix_dir ${dataset} ${dest_subpath})
   mkdir -p ${dest_dir}
   local src_dir=$(get_data_dir ${dataset} ${src_subpath})
-  local count_command="python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} --count_targets"
-  #echo ${count_command}
   exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} ${options}" ${dest_dir} W_SEQ.csv
 }
 
@@ -213,7 +209,6 @@ reduce_dimension(){
   mkdir -p ${dest_dir}
   local src_dir=$(get_original_data_dir ${dataset})
 
-  local count_command="python tools/reduce_dimension.py ${dim} ${src_dir} ${dest_dir} --count_targets"
   exec_command "python tools/reduce_dimension.py ${dim} ${src_dir} ${dest_dir} --algorithm ${alg}" ${dest_dir} X_SEQ.csv
 }
 
@@ -225,7 +220,6 @@ sparse_encode(){
   mkdir -p ${dest_dir}
   local src_dir=$(get_original_data_dir ${dataset})
   #196MB for 128dim x 1000samples
-  local count_command="python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --count_targets"
   exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --method lasso_cd" ${dest_dir} X_SEQ.csv
 }
 

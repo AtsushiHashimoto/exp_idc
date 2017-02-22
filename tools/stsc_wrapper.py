@@ -21,6 +21,6 @@ class SelfTuningSpectralClustering():
         command="%s %d %s %s"%(self.exe,int(self.n_clusters_max),ftemp_X.name,ftemp_y.name)
         print(command)
         p = subprocess.call( command, shell=True  )
-        p.wait()
+        #p.wait()
         y = np.loadtxt(ftemp_y.name,delimiter=',')
         return y
