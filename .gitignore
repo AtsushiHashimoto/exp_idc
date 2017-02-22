@@ -87,3 +87,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+test/W_000.csv
+test/W_stsc.csv
+test/X_000.csv

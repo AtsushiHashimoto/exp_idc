@@ -1,6 +1,3 @@
 [submodule "external/submodules/self_tuning_sc"]
 	path = external/submodules/self_tuning_sc
 	url = https://github.com/pthimon/clustering.git
-[submodule "external/submodules/tapkee"]
-	path = external/submodules/tapkee
-	url = https://github.com/lisitsyn/tapkee.git
