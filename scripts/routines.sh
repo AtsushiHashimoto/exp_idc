@@ -36,7 +36,7 @@ exist_sequence_file(){
   done
   if [ ${is_lack} -eq 1 ]; then
     echo 0
-    return 
+    return
   fi
   echo 1
 }
@@ -60,11 +60,11 @@ exec_command(){
     if [ $? -gt 0 ]; then
       # エラー処理
       echo "ERROR to execute the following command at $(date)" >> ${ERROR_LOG}
-      echo "${comm_}" >> ${ERROR_LOG}
+      echo "${comm}" >> ${ERROR_LOG}
       exit
     else
       # 正常終了の処理
-      echo "${comm_}" >> ${COMPLETE_LOG}
+      echo "${comm}" >> ${COMPLETE_LOG}
     fi
   fi
 
@@ -73,10 +73,10 @@ cat << EOS
 ${comm}
 if [ \$? -gt 0 ]; then
   echo "ERROR to execute the following command at \$(date)" >> ${ERROR_LOG}
-  echo "${comm_}" >> ${ERROR_LOG}
+  echo "${comm}" >> ${ERROR_LOG}
   exit
 else
-  echo "${comm_}" >> ${COMPLETE_LOG}
+  echo "${comm}" >> ${COMPLETE_LOG}
 fi
 EOS
   fi
