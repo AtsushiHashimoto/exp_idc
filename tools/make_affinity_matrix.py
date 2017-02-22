@@ -15,9 +15,8 @@ from my_target_counter import TargetCounter
 
 logger = logging.getLogger(__file__)
 
-
 def find_nth_smallest(a, n):
-    return np.partition(a.flatten(), n-1)[n-1]
+    return np.partition(a, n-1)[n-1]
 
 def calc_stsc_metric(X):
     D = sm.pairwise.pairwise_distances(X, metric='euclidean')
@@ -26,11 +25,16 @@ def calc_stsc_metric(X):
     return np.array(W)
 
 def calc_data_driven_scale_unit(X,scale_unit):
+    if scale_unit=='absolute':
+        return 1
+
     D = sm.pairwise.pairwise_distances(X, metric='euclidean')
     if scale_unit=='median':
-        return np.median(D)
+        n = int(len(D)/2)
     else:
-        return find_nth_smallest(np.ravel(D),int(scale_unit))
+        n = int(scale_unit)
+    vals = [find_nth_smallest(ds,n) for ds in D]
+    return find_nth_smallest(vals,n)
 
 def main(args):
     src_dir = args.src_dir
@@ -52,21 +56,21 @@ def main(args):
         dest_file = "%s/%s"%(args.dest_dir,tc.id2destfile(id))
         #print(id,src_file,dest_file)
         X=np.loadtxt(src_file,delimiter=",")
-        if args.metric=='euclidean':
-            if args.gamma==None:
-                W = calc_stsc_metric(X)
-            else:
-                W = sm.pairwise.rbf_kernel(X,gamma=args.gamma)
+        if args.metric=='stsc':
+            W = calc_stsc_metric(X)
+        elif args.metric=='euclidean':
+                scale_unit = calc_data_driven_scale_unit(X,args.scale_unit)
+                gamma=scale_unit*args.gamma
+                W = sm.pairwise.rbf_kernel(X,gamma=gamma)
                 # ensure graph connectivity.
                 W[W<epsilon]=epsilon
-
         elif args.metric=='cosine':
             W = (sm.pairwise.cosine_similarity(X)+1.0)/2 # normalize the affinity to [0,1]
         else:
             logger.warn("unknown metric '%s'."%args.metric)
         #W = sm.pairwise.pairwise_distances(X, Y=None, metric=args.metric)
-        W[W<0]=0
-        np.savetxt(dest_file,W,delimiter=",")
+        W[W<epsilon]=epsilon
+        np.savetxt(dest_file,W,fmt='%.18e',delimiter=",")
 
 
 
@@ -119,7 +123,7 @@ parser.add_argument('-s','--scale_unit', \
         default='median', \
         type=str, \
         choices=None, \
-        help='Strategy to obtain a data-driven scale unit lamda (gamma*lamda is used as sigma rbf kernel). "median" or an int value (to use the n-th largest distance). (default:median)', \
+        help='Strategy to obtain a data-driven scale unit lamda (gamma*lamda is used as sigma rbf kernel). "median", "absolute" or an int value (to use the n-th largest distance). (default:median)', \
         metavar=None)
 
 
