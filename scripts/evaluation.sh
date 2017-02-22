@@ -47,6 +47,8 @@ for dataset in ${TARGET_DATASETS}; do
       if [[ $(elementsIn ${method} "${TARGET_ALGORITHMS[@]}") == "out" ]]; then
         continue
       fi
+
+
       subpath=raw/${metric}/${method}
       src_dir=$(get_cross_validation_dir ${dataset} ${subpath})
       if [ -e ${src_dir} ]; then
@@ -55,7 +57,7 @@ for dataset in ${TARGET_DATASETS}; do
     done
   done
 
-  for target in cross_validated closed_best; do
+  for target in cross_validated closed_best random; do
     python tools/evaluation.py $(get_original_data_dir ${dataset}) ${EXP_DIR}/summery.${dataset}.${target}.csv -t ${target} ${src_dirs[@]}
   done
 done

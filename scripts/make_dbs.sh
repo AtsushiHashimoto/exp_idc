@@ -23,7 +23,7 @@ for rate_outliers in 0.5 1.0 3.0; do
   mkdir -p ${dest_dir}
   python tools/make_dbs.py preid_mo ${temp_dir} ${dest_dir} --n_clusters 12 --rate_outliers ${rate_outliers}
 done
-exit
+
 # make test dataset.
 # n_clusters=5
 dist_dir=$(get_original_data_dir test_05)

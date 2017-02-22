@@ -9,12 +9,18 @@ for dataset in ${TARGET_DATASETS}; do
   n_clusters=$(get_cluster_num ${dataset})
 
   # SC, IDC
-  for alg in SC_N SC_N1 IDC SG; do
+  for alg in SC_N SC_N1 IDC SG STSC; do
+    if [[ $(elementsIn ${alg} "${TARGET_ALGORITHMS[@]}") == "out" ]]; then
+      continue
+    fi
     subpath=raw/affinity_euclidean/median/*/${alg}
     cross_validation ${dataset} ${subpath}
   done
 
-  for alg in DBSCAN STSC; do
+  for alg in DBSCAN; do
+    if [[ $(elementsIn ${alg} "${TARGET_ALGORITHMS[@]}") == "out" ]]; then
+      continue
+    fi
     subpath=raw/distance_euclidean/DBSCAN/*/*
     cross_validation ${dataset} ${subpath}
   done
@@ -36,7 +42,7 @@ copy_all(){
   dest_dir=$(get_cross_validation_dir ${dataset} ${subpath})
   mkdir -p ${dest_dir}
   for file in `find ${src_dir}/*.dat`; do
-    for target in closed_best cross_validated; do
+    for target in closed_best cross_validated random; do
       dest_file=$(basename ${file%.dat}).${target}.dat
       cp -f ${file} ${dest_dir}/${dest_file}
     done
@@ -49,6 +55,9 @@ for dataset in ${TARGET_DATASETS}; do
   methods=(SC_N SC_N1 IDC SG)
   for metric in ${metrics[@]}; do
     for method in ${methods[@]}; do
+      if [[ $(elementsIn ${method} "${TARGET_ALGORITHMS[@]}") == "out" ]]; then
+        continue
+      fi
       copy_all ${dataset} raw/${metric}/${method}
     done
   done
