@@ -51,11 +51,17 @@ exec_command(){
     is_completed=$(exist_sequence_file ${dest_dir} ${file_template})
     if [[ ${is_completed} -eq 1 ]]; then
       # skip execution
+      if [ ${VERBOSE} -eq 1 ]; then
+        echo "skip ${dest_dir}" >&2
+      fi
       return
     fi
   fi
 
   if [ ${EXECUTE} -eq 1 ]; then
+    if [ ${VERBOSE} -eq 1 ]; then
+      echo "do ${dest_dir}" >&2
+    fi
     sh -c ${comm}
     if [ $? -gt 0 ]; then
       # エラー処理
