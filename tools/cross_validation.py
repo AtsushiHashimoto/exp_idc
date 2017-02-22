@@ -11,6 +11,7 @@ import re
 import os.path
 import sys
 import json
+import random
 
 sys.path.append(os.path.dirname(__file__))
 from my_target_counter import TargetCounter
@@ -98,6 +99,7 @@ def main(args):
     # results[path][id] = score
     for id,gt_file in zip(target_ids,gt_files):
         dest_file = "%s/%s"%(args.dest_dir,tc.id2destfile(id))
+        print(dest_file)
         y_gt = np.loadtxt(gt_file,delimiter=",")
         results = get_results(src_paths,id,y_gt,scorer)
         add_results(results,all_results)
@@ -125,7 +127,14 @@ def main(args):
     with open("%s/cross_validated_paths.dat"%(dest_dir),"w") as fout:
         fout.write("\n".join(cv_paths))
 
-
+    # save random result
+    tar_template_temp = "y_%s.random.dat"
+    tc=TargetCounter(src_pat,tar_template_temp,ground_truth_dir,dest_dir)
+    for id,gt_file in zip(target_ids,gt_files):
+        dest_file = "%s/%s"%(args.dest_dir,tc.id2destfile(id))
+        random.shuffle(src_paths)
+        y_est = np.loadtxt("%s/y_%s.dat"%(src_paths[0],id))
+        np.savetxt(dest_file,y_est,fmt="%d")
 
 parser = argparse.ArgumentParser(description=DESCRIPTION)
 
