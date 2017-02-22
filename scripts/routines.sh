@@ -22,13 +22,34 @@ CV_DIR=${EXP_DIR}/cross_validation
 COMPLETE_LOG=$(basename ${BASH_SOURCE[0]}).completion.log
 ERROR_LOG=$(basename ${BASH_SOURCE[0]}).error.log
 
+
+exist_sequence_file(){
+  dest_dir=$1
+  template=$2
+  is_lack=0
+  for n in ${FILE_SEQ}; do
+    file=${dest_dir}/$(echo ${template} | sed -e s/SEQ/${n}/)
+    if [ ! -e ${file} ]; then
+      is_lack=1
+      break
+    fi
+  done
+  if [ ${is_lack} -eq 1 ]; then
+    echo 0
+    return 
+  fi
+  echo 1
+}
+
 exec_command(){
   comm=$1
 
   # if len(args)>1 and File.exists($2) and OVERWRITE==0
-  if [ $# -gt 1 -a ${OVERWRITE} -eq 0 ]; then
-    local tar_num=$($2)
-    if [[ ${tar_num} -eq 0 ]]; then
+  if [ $# -eq 3 -a ${OVERWRITE} -eq 0 ]; then
+    dest_dir=$2
+    file_template=$3
+    is_completed=$(exist_sequence_file ${dest_dir} ${file_template})
+    if [[ ${is_completed} -eq 1 ]]; then
       # skip execution
       return
     fi
@@ -127,7 +148,7 @@ clustering(){
   mkdir -p ${dest_dir}
   local src_dir=$(get_matrix_dir ${dataset} ${src_subpath})
   local count_command="python tools/do_clustering.py ${src_dir} ${dest_dir} --count_targets"
-  exec_command "python tools/do_clustering.py ${algorithm} ${src_dir} ${dest_dir} ${options}" "${count_command}"
+  exec_command "python tools/do_clustering.py ${algorithm} ${src_dir} ${dest_dir} ${options}" ${dest_dir} y_SEQ.dat
 }
 
 
@@ -139,7 +160,6 @@ cross_validation(){
   #local count_command="python tools/cross_validation.py ${src_dir} ${dest_dir} --count_targets"
   local src_dir=$(get_result_dir ${dataset} "${subpath}")
   local ground_truth_dir=$(get_original_data_dir ${dataset})
-  local count_command="python tools/cross_validation.py \"${src_dir}\" ${ground_truth_dir} ${dest_dir} --count_targets"
   exec_command "python tools/cross_validation.py \"${src_dir}\" ${ground_truth_dir} ${dest_dir} --criterion AMI"
 }
 
@@ -163,7 +183,7 @@ make_matrix(){
   local src_dir=$(get_data_dir ${dataset} ${src_subpath})
   local count_command="python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} --count_targets"
   #echo ${count_command}
-  exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} ${options}" "${count_command}"
+  exec_command "python tools/make_${type}_matrix.py ${metric} ${src_dir} ${dest_dir} ${options}" ${dest_dir} W_SEQ.csv
 }
 
 make_affinity_matrix(){
@@ -194,7 +214,7 @@ reduce_dimension(){
   local src_dir=$(get_original_data_dir ${dataset})
 
   local count_command="python tools/reduce_dimension.py ${dim} ${src_dir} ${dest_dir} --count_targets"
-  exec_command "python tools/reduce_dimension.py ${dim} ${src_dir} ${dest_dir} --algorithm ${alg}" "${count_command}"
+  exec_command "python tools/reduce_dimension.py ${dim} ${src_dir} ${dest_dir} --algorithm ${alg}" ${dest_dir} X_SEQ.csv
 }
 
 sparse_encode(){
@@ -206,7 +226,7 @@ sparse_encode(){
   local src_dir=$(get_original_data_dir ${dataset})
   #196MB for 128dim x 1000samples
   local count_command="python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --count_targets"
-  exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --method lasso_cd" "${count_command}"
+  exec_command "python tools/sparse_encoding.py ${alpha} ${src_dir} ${dest_dir} --method lasso_cd" ${dest_dir} X_SEQ.csv
 }
 
 get_cluster_num(){
