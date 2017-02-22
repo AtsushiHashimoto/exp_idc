@@ -80,7 +80,7 @@ for dataset in ${TARGET_DATASETS}; do
 
   # STSC
   for mat in `find $(get_matrix_dir ${dataset} raw/distance_euclidean) -type f|grep W_000.csv`; do
-    clustering ${dataset} STSC ${subpath} ${subpath}/STSC "--n_clusters "
+    clustering ${dataset} STSC ${subpath} ${subpath}/STSC "--max_clusters 20"
     if [ ${TEST} -eq 1 ]; then
       break
     fi
