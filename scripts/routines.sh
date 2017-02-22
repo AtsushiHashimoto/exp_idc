@@ -19,44 +19,47 @@ CV_DIR=${EXP_DIR}/cross_validation
 #TRIALS=`seq -f "%03g" 0 99`
 #TRIALS=`seq -f "%03g" 0 0`
 
-
-QSUB_DIR=${DATASET_DIR}/qsub
-QSUB_COMMAND='qsub -ug gr20111 -q tc -A p=1:t=1:c=1:m=128M'
-UserGroup=gr20111
-Queue=gr20100b
-
+COMPLETE_LOG=$(basename ${BASH_SOURCE[0]}).completion.log
+ERROR_LOG=$(basename ${BASH_SOURCE[0]}).error.log
 
 exec_command(){
   comm=$1
 
   # if len(args)>1 and File.exists($2) and OVERWRITE==0
-  if [ $# -gt 1 -a ${OVERWRITE} -eq 0 -a ${QSUB} -eq 1 ]; then
+  if [ $# -gt 1 -a ${OVERWRITE} -eq 0 ]; then
     local tar_num=$($2)
     if [[ ${tar_num} -eq 0 ]]; then
       # skip execution
       return
     fi
   fi
-  if [ ${QSUB} -eq 0 ]; then
-    ${EXE} "${comm}"
-    return
+
+  if [ ${EXECUTE} -eq 1 ]; then
+    sh -c ${comm}
+    if [ $? -gt 0 ]; then
+      # エラー処理
+      echo "ERROR to execute the following command at $(date)" >> ${ERROR_LOG}
+      echo "${comm_}" >> ${ERROR_LOG}
+      exit
+    else
+      # 正常終了の処理
+      echo "${comm_}" >> ${COMPLETE_LOG}
+    fi
   fi
-  if [ $# -gt 2 ]; then
-    option=$3
-  else
-    option="p=1:t=1:c=1:m=256M"
+
+  if [ ${PRINT_BATCH} -eq 1 ]; then
+cat << EOS
+${comm}
+if [ \$? -gt 0 ]; then
+  echo "ERROR to execute the following command at \$(date)" >> ${ERROR_LOG}
+  echo "${comm_}" >> ${ERROR_LOG}
+  exit
+else
+  echo "${comm_}" >> ${COMPLETE_LOG}
+fi
+EOS
   fi
-  if [ $# -gt 3 ]; then
-    hours=$4
-  else
-    hours=18:00
-  fi
-  #echo "/usr/bin/ls -lha > test.log" > temp|qsub -ug gr20111 -q gr20100b -W 12:00 -A p=1:t=1:c=1:m=1M temp
-  temp_id=$(date +"%s.%N");
-  temp_sh=${TEMP_DIR}/qsub_${temp_id}.sh
-  work_dir=$(pwd)/$(dirname ${BASH_SOURCE[0]})/../
-  comm_="echo \"source ~/.bash_profile;cd ${work_dir};${comm}\" > ${temp_sh} | qsub -ug ${UserGroup} -q ${Queue} -W ${hours} -A ${option} ${temp_sh}"
-  ${EXE} "${comm_}"
+  return
 }
 
 get_data_dir(){
