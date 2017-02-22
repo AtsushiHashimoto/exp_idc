@@ -15,13 +15,15 @@ from my_target_counter import TargetCounter
 
 logger = logging.getLogger(__file__)
 
+
 def find_nth_smallest(a, n):
     return np.partition(a, n-1)[n-1]
 
+EPSILON=0.1**3
 def calc_stsc_metric(X):
     D = sm.pairwise.pairwise_distances(X, metric='euclidean')
     sigma = [find_nth_smallest(ds,7) for ds in D]
-    W = [[np.exp(-d*d/(sigma[i]*sigma[j])) for i,d in enumerate(ds)] for j,ds in enumerate(D)]
+    W = [[np.exp(-d*d/(sigma[i]*sigma[j]+EPSILON)) for i,d in enumerate(ds)] for j,ds in enumerate(D)]
     return np.array(W)
 
 def calc_data_driven_scale_unit(X,scale_unit):
