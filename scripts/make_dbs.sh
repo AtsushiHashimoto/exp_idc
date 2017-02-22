@@ -18,12 +18,11 @@ for dir in $(find external/preid_mo/* -type d); do
 done
 
 for rate_outliers in 0.5 1.0 3.0; do
-  dist_dir=$(get_original_data_dir preid_mo_${rate_outliers}_12)
-  #echo ${dist_dir}
-  mkdir -p ${dist_dir}
-  python tools/make_dbs.py preid_mo ${temp_dir} ${dist_dir} --n_clusters 12 --rate_outliers ${rate_outliers}
+  dest_dir=$(get_original_data_dir preid_mo_${rate_outliers}_12)
+  #echo ${dest_dir}
+  mkdir -p ${dest_dir}
+  python tools/make_dbs.py preid_mo ${temp_dir} ${dest_dir} --n_clusters 12 --rate_outliers ${rate_outliers}
 done
-
 
 # make test dataset.
 # n_clusters=5

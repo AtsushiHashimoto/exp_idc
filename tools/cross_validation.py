@@ -109,6 +109,7 @@ def main(args):
         y_est = np.loadtxt("%s/y_%s.dat"%(best[1],id))
         np.savetxt(dest_file,y_est,fmt="%d")
 
+
     with open("%s/summary_%s.json"%(dest_dir,criterion),"w") as fout:
         fout.write(json.dumps(all_results))
 

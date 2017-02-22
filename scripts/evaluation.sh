@@ -25,6 +25,7 @@ for dataset in ${TARGET_DATASETS}; do
     if [[ $(elementsIn ${alg} "${TARGET_ALGORITHMS[@]}") == "out" ]]; then
       continue
     fi
+
     subpath=raw/distance_euclidean/DBSCAN
     src_dir=$(get_cross_validation_dir ${dataset} ${subpath})
     if [ -e ${src_dir} ]; then
